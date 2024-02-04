@@ -1,0 +1,65 @@
+<%-include('./header',{ title: 'Products in category',category:selectedCategory,selectedCategory: selectedCategory, products: products})%>
+<style>
+  #navbar{
+    padding-right: 50px;
+    background-color: black;
+    }
+
+.nav-link:not(:last-child) {
+    color: white;
+    margin-right: 10px; 
+}
+#signupbody{
+    padding-top:50px;
+    background-image: url(/images/wallpaper.jpg);
+    background-size: cover;
+    background-position: center;
+    width: 100%; 
+}
+#loginbody{
+    padding-top:50px;
+    background-image: url(/images/wallpaper.jpg);
+    background-size: cover;
+    background-position: center;
+    width: 100%; 
+}
+.nav-link{
+    color: white;
+}
+
+#logo{
+    height: 80px;
+}
+
+</style>
+<div class="container mt-5">
+  <h2 class="mb-4">Products in Category: <%= selectedCategory.name %></h2>
+  <div class="row">
+    <% products
+      .filter(product => !product.category.blocked && !product.blocked)
+      .filter(p => p.category.toString() === selectedCategory._id.toString())
+      .forEach(product => { %>
+        <div class="col-md-4 mb-4">
+          <div class="card position-relative">
+   
+    <button class="btn btn-light btn-wishlist position-absolute top-0 end-0 mt-2 me-2">
+      <i class="fas fa-heart"></i>
+    </button>
+            <a href="/products/<%= product._id %>">
+              <img src="/<%= product.images.length > 0 ? product.images[0] : '' %>" width="50" class="card-img-top" alt="<%= product.name %>">
+            </a>
+            <div class="card-body">
+              <h5 class="card-title"><%= product.name %></h5>
+              <p class="card-text"><%= product.description %></p>
+              <p class="card-text"><strong>Price:</strong> $<%= product.price %></p>
+              <a href="#" class="btn btn-primary">Add to Cart</a>
+            </div>
+          </div>
+        </div>
+    <% }); %>
+  </div>
+</div>
+  
+
+
+<%-include('./footer')%>

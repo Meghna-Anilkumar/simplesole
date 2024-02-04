@@ -1,0 +1,78 @@
+<%-include('./header')%>
+<section class="pt-5 pb-5 mt-0 align-items-center d-flex bg-dark" style="min-height: 100vh; background-size: cover; background-image: url(/images/wallpaper.jpg)">  <style>
+    .container-fluid {
+      margin-top: 150px;
+    }
+</style>
+    <div class="container-fluid">
+      <div class="row  justify-content-center align-items-center d-flex-row text-center h-100">
+        <div class="col-12 col-md-4 col-lg-3   h-50 ">
+          <div class="card shadow">
+            <div class="card-body mx-auto">
+              <h4 class="card-title mt-3 text-center">Create Account</h4>
+              
+              <!-- <p>
+                <a href="" class="btn btn-block btn-primary">
+                  <i class="fab fa-facebook-f mr-2"></i>Login via facebook</a>
+              </p> -->
+              <p class="text-muted font-weight-bold ">
+              </p>
+              <form action="/signup" method="post">
+                <div class="form-group input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"> <i class="fa fa-user"></i> </span>
+                  </div>
+                  <input name="name" class="form-control" placeholder="Enter your name" type="text" required="true">
+                </div>
+                <br>
+                <div class="form-group input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"> <i class="fa fa-envelope"></i> </span>
+                  </div>
+                  <input name="email" class="form-control" placeholder="Email address" type="email" required="true">
+                </div>
+                <br>
+                <div class="form-group input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                  </div>
+                  <input class="form-control" id="password" name="password" placeholder="Enter password" type="password" required="true">
+                </div>
+                <br>
+                <div class="form-group input-group">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
+                  </div>
+                  <input class="form-control" name="confirm" placeholder="Confirm password" type="password" required="true">
+                </div>
+                <br>
+                <div class="form-group">
+                  <button type="submit" class="btn btn-primary btn-block"> Create Account </button>
+                </div>
+                <p class="text-center">Have an account?
+                  <a href="/Login">Log In</a>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+<%-include('./footer')%>
+<script>
+  function validateForm() {
+    const password = document.getElementById('password').value;
+
+   
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      alert("Password must contain at least one uppercase letter, one lowercase letter, one special character, and be at least 8 characters long");
+      return false; 
+    }
+
+    return true; 
+  }
+</script>
