@@ -5,14 +5,20 @@ const session = require('express-session')
 module.exports={
     islogged:(req,res,next)=>{
      if(req.session.isAuth){
-        res.redirect('/')
+      console.log('User is already logged in');
+      res.redirect('/')
      }
-     else{
         next()
-     }
+    },
+    
+    userexist:(req,res,next)=>{
+    if(!req.session.user){
+     next()
     }
-
-
+    else{
+        res.redirect('/')
+    }
+    }
 
 
     }

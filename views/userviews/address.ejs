@@ -1,0 +1,181 @@
+<%-include('./header')%>
+<%-include('./sidebar')%>
+<style>
+.address-box {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+
+/* Additional styling for the address actions */
+.address-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.edit-btn, .delete-btn {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #3498db;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+}
+</style>
+<div class="col-md-5 border-right" style="margin-top: 80px;">
+    <div class="p-3 py-5">
+        <form id="editProfileForm">
+            <div class="mt-3">
+                
+                <button class="btn btn-primary profile-button" id="openAddressModal" type="button">
+                    <i class="fas fa-plus"></i> Add Address
+                </button>
+                
+                <div id="addressContainer" style="border: 1px; padding: 10px;">
+                   
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="modal fade" id="addressModal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addressModalLabel">Add Address</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addressForm">
+                    <div class="form-group">
+                        <label for="addressName">Name</label>
+                        <input type="text" class="form-control" id="addressName" name="addressName" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="mobileNumber">Mobile Number</label>
+                        <input type="text" class="form-control" id="mobileNumber" name="mobileNumber" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="buildingname">Building name</label>
+                        <input type="text" class="form-control" id="buildingname" name="buildingname" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="street">Street</label>
+                        <input type="text" class="form-control" id="street" name="street" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input type="text" class="form-control" id="city" name="city" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input type="text" class="form-control" id="state" name="state" placeholder="">
+                    </div>
+                    <div class="form-group">
+                        <label for="PIN Code">PIN Code</label>
+                        <input type="text" class="form-control" id="PIN Code" name="PIN Code" placeholder="">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address Type</label><br>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="addressType" id="homeAddress" value="home">
+                            <label class="form-check-label" for="homeAddress">Home</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="addressType" id="workAddress" value="work">
+                            <label class="form-check-label" for="workAddress">Work</label>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Save Address</button>
+                </form>    
+    </div>
+</div>
+
+<div class="modal fade" id="addressModal" tabindex="-1" role="dialog" aria-labelledby="addressModalLabel" aria-hidden="true">
+</div>
+
+<script>
+    document.getElementById('openAddressModal').addEventListener('click', function () {
+        $('#addressModal').modal('show');
+    });
+
+    document.getElementById('addressForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const addressData = {
+            name: document.getElementById('addressName').value,
+            mobile: document.getElementById('mobileNumber').value,
+            buildingname: document.getElementById('buildingname').value,
+            street: document.getElementById('street').value,
+            city: document.getElementById('city').value,
+            state: document.getElementById('state').value,
+            pincode: document.getElementById('PIN Code').value,
+            addresstype: document.querySelector('input[name="addressType"]:checked').value
+        };
+
+        fetch('/saveAddress', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(addressData),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Address saved:', data);
+
+
+            // Clear form fields
+            document.getElementById('addressForm').reset();
+
+            // Close the modal
+            $('#addressModal').modal('hide');
+        })
+        .catch(error => console.error('Error saving address:', error));
+    });
+
+    window.addEventListener('load', () => {
+        fetch('/getAddresses')
+            .then(response => response.json())
+            .then(addresses => {
+
+                addresses.forEach(address => {
+                    const addressElement = document.createElement('div');
+                    addressElement.className = 'address-box';
+                    addressElement.innerHTML = `
+                      ${address.name},
+                      ${address.mobile},
+                      ${address.buildingname},
+                      ${address.street},
+                      ${address.city},
+                      ${address.state},
+                      ${address.pincode},
+                      ${address.addresstype}
+                        
+                    `;
+                    document.getElementById('addressContainer').appendChild(addressElement);
+                });
+            })
+            .catch(error => console.error('Error loading addresses:', error));
+    });
+</script>
+
+
+<%-include('./footer')%>

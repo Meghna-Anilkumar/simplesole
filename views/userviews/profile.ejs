@@ -1,12 +1,154 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title></title>
-</head>
-<body>
-    <h1>WELCOME</h1>
-    <a href="/logout">Logout</a>
-</body>
-</html>
+<%-include('./header')%>
+
+<style>body {
+    background: rgb(186, 136, 205)
+}
+.sidebar a {
+        display: block;
+        margin-bottom: 10px;
+        color: #333;
+        text-decoration: none;
+        font-weight: bold;
+        list-style-type: disc; /* Display as bullets */
+    }
+
+    .sidebar a:hover {
+        color: #682773;
+    }
+
+.form-control:focus {
+    box-shadow: none;
+    border-color: #BA68C8
+}
+
+.profile-button {
+    background: rgb(99, 39, 120);
+    box-shadow: none;
+    border: none
+}
+
+.profile-button:hover {
+    background: #682773
+}
+
+.profile-button:focus {
+    background: #682773;
+    box-shadow: none
+}
+
+.profile-button:active {
+    background: #682773;
+    box-shadow: none
+}
+
+.back:hover {
+    color: #682773;
+    cursor: pointer
+}
+
+.labels {
+    font-size: 11px
+}
+
+.add-experience:hover {
+    background: #BA68C8;
+    color: #fff;
+    cursor: pointer;
+    border: solid 1px #BA68C8
+}
+</style>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 sidebar" style="margin-top: 90px;">
+            <div class="d-flex flex-column align-items-center text-center p-3 py-5">
+                <!-- <img class="rounded-circle mt-5" width="150px"
+                    src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"> -->
+                    <span class="font-weight-bold"><%= data ? (data.firstName || '') : '' %> <%= data ? (data.lastName || '') : '' %></span>
+                    <span class="font-weight-bold">Phone:
+                        <%= data ? (data.mobileNumber || '') : '' %>
+                    </span>
+
+                <span class="text-black-50"><%= user.email %></span><span> <a href="/logout">Logout</a> </span>
+            </div>
+            <!-- Sidebar Links -->
+            <div class="text-center">
+                <ul class="list-unstyled">
+                    <li><a href="/address" class="text-decoration-none text-dark">Address Book</a></li>
+                    <li><a href="#" class="text-decoration-none text-dark">Orders</a></li>
+                    <li><a href="#" class="text-decoration-none text-dark">Wallet</a></li>
+                    <li><a href="#" class="text-decoration-none text-dark">Change password</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-md-5 border-right" style="margin-top: 80px;">
+            <div class="p-3 py-5">
+                <form id="editProfileForm">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-right">Edit Profile Details</h4>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label class="labels">First name</label>
+                            <input type="text" id="firstName" class="form-control" name="firstName" placeholder="first name" value="<%= data && data.firstName ? data.firstName : '' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="labels">Last name</label>
+                            <input type="text" id="lastName" class="form-control" name="lastName" placeholder="last name" value="<%= data && data.lastName ? data.lastName : '' %>">
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <label class="labels">Mobile Number</label>
+                            <input type="text" id="mobileNumber" class="form-control" name="mobileNumber" placeholder="enter phone number" value="<%= data && data.mobileNumber ? data.mobileNumber : '' %>">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 text-center">
+                        <button class="btn btn-primary profile-button" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+    </div>
+</div>
+
+</div>
+<script>
+    document.getElementById('editProfileForm').addEventListener('submit', async function (event) {
+    event.preventDefault();
+    const formData = new FormData(this);
+        const firstName = formData.get('firstName');
+        const lastName = formData.get('lastName');
+        const mobileNumber = formData.get('mobileNumber');
+        
+        try {
+        const response = await fetch('/editprofiledetails', {
+            method: 'POST',
+            body: JSON.stringify({ firstName, lastName, mobileNumber }),
+            headers: {
+                "Content-Type": "application/json",
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            const { firstName: updatedFirstName, lastName: updatedLastName, mobileNumber: updatedMobileNumber } = data;
+
+            document.getElementById('firstName').value = updatedFirstName;
+            document.getElementById('lastName').value = updatedLastName;
+            document.getElementById('mobileNumber').value = updatedMobileNumber;
+
+            console.log('Profile details updated successfully');
+        } else {
+            console.error('Error updating profile details:', response.status);
+        }
+    } catch (error) {
+        console.error('Fetch error:', error);
+    }
+});
+
+</script>
+
+<%-include('./footer')%>

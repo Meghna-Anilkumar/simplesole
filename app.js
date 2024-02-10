@@ -43,23 +43,24 @@ app.use(session({
 }))
 
 //isAuth middleware
-  const isAuth = async (req, res, next) => {
-    if (req.session.isAuth) {
-      console.log("hello");
-      next();
-    } else {
-      res.redirect('/login')
-    }
-  }; 
+  // const isAuth = async (req, res, next) => {
+  //   if (req.session.isAuth) {
+  //     console.log("hello");
+  //     next();
+  //   } else {
+  //     res.redirect('/login')
+  //   }
+  // }; 
 
  // Route using the isAuth middleware
-  app.get('/usericon', isAuth, (req, res) => {
-    res.render('userviews/profile',
-    {title:'User Profile'});
-  });
+  // app.get('/usericon', isAuth, (req, res) => {
+  //   res.render('userviews/profile',
+  //   {title:'User Profile'});
+  // });
 
   //route for logout
   app.get('/logout',(req, res) => {
+    req.session.isAuth=false;
     req.session.destroy(err => {
         if (err) {
             console.error('Error destroying session:', err);

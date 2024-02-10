@@ -262,6 +262,9 @@ img {
                   <h5 class="colors">color:
                     <span class="color <%= product.color%>"></span>
                   </h5>
+                  <h5 class="quantity">Quantity:
+                    <input type="number" class="quantity-input" value="1" min="1" required>
+                  </h5>
                   <div class="action">
                       <button class="add-to-cart btn btn-primary" type="button">add to cart</button>
                       <button class="like btn btn-danger" type="button"><span class="fa fa-heart"></span></button>
@@ -271,6 +274,23 @@ img {
       </div>
   </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+  function addToCart() {
+    const quantity = document.querySelector('.quantity-input').value;
+     
+    if (quantity === '0') {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Quantity cannot be zero!',
+      });
+    } else {
+     
+      console.log('Adding to cart with quantity:', quantity);
+    }
+  }
+</script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
       const zoomableImages = document.querySelectorAll('.zoomable-image');
