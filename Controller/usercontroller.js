@@ -133,13 +133,14 @@ module.exports ={
         if (req.session.isAuth) {
             const x = req.session.user;
             const userId = x ? x._id : null;
+            const id = req.params.id;
 
             const userData = await UserDetails.findOne({ user: userId });
             const addresses = await Address.find({ user: userId });
             const categories = await Category.find();
-
+            const result = await Address.findByIdAndUpdate(id, req.body, { new: true });
             // Pass both userData and addresses to the view
-            return res.render('userviews/address', { title: 'Address', category: categories, data: { user: req.session.user, userData, addresses } });
+            return res.render('userviews/address', { title: 'Address', category: categories,data: { user: req.session.user, userData, addresses },address: result });
         } else {
             const categories = await Category.find();
             return res.render('userviews/login', { title: 'Login', category: categories });
@@ -178,5 +179,101 @@ module.exports ={
       console.error('Error getting addresses:', error);
       res.status(500).json({ message: 'Internal Server Error' });
   }
+  },
+
+  //delete addresses
+  deleteAddress: async (req, res) => {
+    try {
+        const addressId = req.params.id;
+        const result = await Address.findByIdAndDelete(addressId);
+
+        if (!result) {
+            return res.status(404).json({ error: 'Address not found' });
+        }
+
+        res.json({ message: 'Address deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+},
+
+//edit addresses
+editAddress: async (req, res) => {
+  try {
+    const addressId=req.params.id
+    const updatedAddress = await Address.findByIdAndUpdate(
+        addressId,req.body,{new:true});
+
+    res.json(updatedAddress);
+} catch (error) {
+    console.error('Error updating address:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+}
+},
+
+//get change password page
+changepasswordpage: async (req, res) => {
+  try {
+    const categories = await Category.find();
+    const userId = req.session.user ? req.session.user._id : null;
+
+    // Fetch user data and addresses
+    const userData = await UserDetails.findOne({ user: userId });
+    const addresses = await Address.find({ user: userId });
+
+    res.render('userviews/changepassword', {
+      title: 'Change password',
+      category: categories,
+      data: { user: req.session.user, userData, addresses }
+    });
+  } catch (error) {
+    console.error('Error rendering change password page:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+},
+
+//change password
+changepassword: async (req, res) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const userId = req.session.user._id; 
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
+    }
+
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\-]).{8,}$/;
+    if (!regex.test(newPassword)) {
+      return res.status(400).json({ error: 'Invalid new password format' });
+    }
+
+    user.password = newPassword;
+    user.confirmPassword = newPassword;
+    
+    await user.save();
+    req.session.user = user;
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 }
+
+}
+
+
+
+
+
+
+
+

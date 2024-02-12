@@ -20,10 +20,16 @@ router.get('/products/:id',productcontroller.getproductdetails)
 router.get('/Login',usercontroller.Login)
 router.get('/usericon',usercontroller.userIcon)
 router.post('/editprofiledetails',usercontroller.editprofiledetails)
+
+//address
 router.get('/address',usercontroller.getaddressbook)
 router.post('/saveaddress',usercontroller.addnewaddress)
 router.get('/getaddresses',usercontroller.getaddresses)
+router.post('/deleteaddress/:id',usercontroller.deleteAddress)
+router.post('/updateAddress/:addressId',usercontroller.editAddress)
 
-
+//change password
+router.get('/changepassword',usercontroller.changepasswordpage)
+router.post('/changepassword',usercontroller.changepassword)
 
 module.exports = router
