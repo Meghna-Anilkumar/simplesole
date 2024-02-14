@@ -10,7 +10,7 @@ const bodyParser = require('body-parser')
 const nodemailer=require('nodemailer')
 const nocache = require('nocache');
 const morgan = require('morgan');
-const userrouter = require('./routes/userrouter');
+const userrouter = require('./routes/userrouter')
 const adminrouter = require('./routes/adminrouter')
 
 const app = express()

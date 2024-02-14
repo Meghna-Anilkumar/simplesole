@@ -10,6 +10,7 @@ const bcrypt=require('bcrypt')
 const categorycontroller=require('../Controller/categorycontroller');
 const isAuth = require('../middlewares/isAuth')
 const UserDetails=require('../models/userdetails')
+const cartcontroller=require('../Controller/cartcontroller')
 
 router.get(['/','/home'],usercontroller.homepage)
 router.get('/signup',isAuth.islogged,usercontroller.signup)
@@ -31,5 +32,11 @@ router.post('/updateAddress/:addressId',usercontroller.editAddress)
 //change password
 router.get('/changepassword',usercontroller.changepasswordpage)
 router.post('/changepassword',usercontroller.changepassword)
+
+//cart
+router.get('/cart',isAuth.checkAuth,cartcontroller.getcart)
+router.post('/cart/add',isAuth.checkAuth,cartcontroller.addtocart)
+router.post('/updateQuantity/:productId/:change',cartcontroller.updatequantity)
+router.post('/removeItem/:productId',cartcontroller.deleteitem)
 
 module.exports = router

@@ -291,12 +291,34 @@ img {
     }
   }
 </script>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-      const zoomableImages = document.querySelectorAll('.zoomable-image');
-      mediumZoom(zoomableImages);
+    const addToCartButton = document.querySelector('.add-to-cart');
+    
+    addToCartButton.addEventListener('click', function () {
+      const productId = '<%= product._id %>';
+      const quantity = document.querySelector('.quantity-input').value;
+
+      fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          productId,
+          quantity,
+        }),
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data); 
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    });
   });
 </script>
-<script src="https://cdn.jsdelivr.net/npm/medium-zoom@3.0.2/dist/medium-zoom.min.js"></script>
-</head>
+
 <%-include('./footer')%>
