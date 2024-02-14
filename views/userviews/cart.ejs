@@ -185,7 +185,7 @@ a:hover{
             <div><h5><b>Summary</b></h5></div>
             <hr>
             <div class="row">
-                <div class="col" style="padding-left:0;">ITEMS <%= cart.items.length %></div>
+                <div class="col" style="padding-left:0;">PRICE(<%= cart.items.length %> ITEMS)</div>
                 <div id="totalPrice" class="col text-right">&#8377;<%= data.total%></div>
             </div>
             <form>
@@ -198,7 +198,7 @@ a:hover{
                 <div class="col">TOTAL PRICE</div>
                 <div class="col text-right">&#8377;<%= data.total%></div>
             </div>
-            <button class="btn">CHECKOUT</button>
+            <button class="btn"><a href='/proceedtocheckout'>PROCEED TO CHECKOUT</a></button>
         </div>
     </div>
 
@@ -232,6 +232,7 @@ a:hover{
       window.location.reload()
   } 
 
+  
 
 </script>
 </div>

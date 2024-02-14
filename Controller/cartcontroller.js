@@ -14,7 +14,7 @@ getcart: async (req, res) => {
       const cart = await Cart.findOne({ user }).populate('items.product').exec();
 
       if (!cart) {
-          return res.render('userviews/cart', { title: 'Cart', category: [], data: { total: 0 } });
+          return res.render('userviews/cart', { title: 'Cart', category: [], data: { total} });
       }
 
       const categories = await Category.find();
@@ -24,6 +24,9 @@ getcart: async (req, res) => {
           console.error('Total price is not a number:', totalPrice);
           return res.status(500).json({ error: 'Internal Server Error' });
       }
+
+      cart.total = totalPrice;
+      await cart.save();
 
       const data = {
           total: totalPrice,

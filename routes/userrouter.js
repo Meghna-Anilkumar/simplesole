@@ -11,6 +11,9 @@ const categorycontroller=require('../Controller/categorycontroller');
 const isAuth = require('../middlewares/isAuth')
 const UserDetails=require('../models/userdetails')
 const cartcontroller=require('../Controller/cartcontroller')
+const checkoutcontroller=require('../Controller/checkoutcontroller')
+
+
 
 router.get(['/','/home'],usercontroller.homepage)
 router.get('/signup',isAuth.islogged,usercontroller.signup)
@@ -38,5 +41,9 @@ router.get('/cart',isAuth.checkAuth,cartcontroller.getcart)
 router.post('/cart/add',isAuth.checkAuth,cartcontroller.addtocart)
 router.post('/updateQuantity/:productId/:change',cartcontroller.updatequantity)
 router.post('/removeItem/:productId',cartcontroller.deleteitem)
+
+//checkout page
+router.get('/proceedtocheckout',isAuth.checkAuth,checkoutcontroller.checkoutpage)
+
 
 module.exports = router
