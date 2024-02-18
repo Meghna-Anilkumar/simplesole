@@ -6,6 +6,6 @@ const calculateTotalPrice = (items) => {
     return total.toFixed(2);
 };
 
-module.exports ={
+module.exports = {
     calculateTotalPrice,
 }

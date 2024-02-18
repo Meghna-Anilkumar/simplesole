@@ -1,8 +1,8 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
-const bcrypt= require('bcrypt')
+const bcrypt = require('bcrypt')
 
-const userSchema=new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
@@ -10,7 +10,7 @@ const userSchema=new mongoose.Schema({
     email: {
         type: String,
         required: true,
-        unique:true,
+        unique: true,
         validate: {
             validator: (value) => {
                 return validator.isEmail(value);
@@ -51,7 +51,7 @@ userSchema.pre('save', async function (next) {
             const salt = await bcrypt.genSalt(saltRounds);
             const hashedPassword = await bcrypt.hash(this.password, salt);
             this.password = hashedPassword;
-            this.confirmPassword= hashedPassword
+            this.confirmPassword = hashedPassword
         }
         next();
     } catch (error) {
@@ -60,4 +60,4 @@ userSchema.pre('save', async function (next) {
 })
 
 
-module.exports = mongoose.model('User',userSchema)
+module.exports = mongoose.model('User', userSchema)

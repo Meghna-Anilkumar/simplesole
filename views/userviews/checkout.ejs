@@ -417,93 +417,105 @@ input[type="text"] {
     transform: rotate(359deg);
   }
 }
-
 </style>
+
 <div class="container">
-    <div class="navigation">
-
-      <div class="logo">
-        <i class="icon icon-basket"></i></div>
-      <div class="secure">
-        <i class="icon icon-shield"></i>
-        <span></span>
-
-      </div>
+  <div class="navigation">
+    <div class="logo">
+      <i class="icon icon-basket"></i>
     </div>
-    <div class="notification">
-      Complete Your Purchase
+    <div class="secure">
+      <i class="icon icon-shield"></i>
+      <span></span>
     </div>
   </div>
-</header>
-<section class="content">
-
-  <div class="container">
-    <div class="payment">
-      <div class="payment__title">
-        Payment Method
-      </div>
-      <div class="payment__types">
-        <div class="payment__type payment__type--cc active">
-          <i class="icon icon-credit-card"></i>CASH ON DELIVERY</div>
-        <div class="payment__type payment__type--paypal">
-          <i class="icon icon-paypal"></i>WALLET</div>
-        <div class="payment__type payment__type--paypal">
-          <i class="icon icon-wallet"></i>RAZORPAY</div>
-      </div>
-
-       <br>
-      <div class="col-md-4 summary">
-        <div><h5><b>Summary</b></h5></div>
-        <hr>
-        <div class="row">
-            <div class="col" style="padding-left:0;"><%=cart.items.length%> ITEMS</div>
-            <div class="col text-right">&#8377;<%= cart.total%></div>
-        </div>
-        <form>
-            <p>SHIPPING</p>
-            
-            <!-- <p>GIVE CODE</p> -->
-            <!-- <input id="code" placeholder="Enter your code"> -->
-        </form>
-        <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
-            <div class="col">TOTAL PRICE</div>
-            <div class="col text-right">&#8377;<%= cart.total%></div>
-        </div>
-    </div>
+  <div class="notification">
+    Complete Your Purchase
+  </div>
 </div>
 
-<div class="col-md-8 payment__shipping" id="shippingInfoContainer">
-  <div class="payment__title">
-    <i class="icon icon-plane"></i> Select Shipping Address
-  </div><button class="btn btn-primary profile-button" id="openAddressModal" type="button" style="background-color: blueviolet;">
-    <i class="fas fa-plus"></i> Add Address
-</button>
+<!-- <section class="content"> -->
+  <div class="container">
+    
+        <br>
 
-<%-include('./addaddress')%>
+        <div class="col-md-4 summary">
+          <div><h5><b>Summary</b></h5></div>
+          <hr>
+          <div class="row">
+            <div class="col" style="padding-left:0;">
+              <%= cart.items.length %> ITEMS
+            </div>
+            <div class="col text-right">&#8377;<%= cart.total %></div>
+          </div>
 
-  <div class="addresses-container">
-    <% addresses.forEach(address => { %>
-      <div class="details__user" id="<%= 'user_' + address._id %>">
-        <input type="radio" name="selectedAddress" id="<%= 'radio_' + address._id %>">
-        <div class="user__name">
-          <%= address.name %><br>
-          Shipping Address: <%= address.buildingname %>, <%= address.street %>,<%= address.city%>,<%= address.state%>,<%= address.pincode%>,TYPE:<%= address.addresstype%><br>
+          <p>SHIPPING</p>
+
+          <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
+            <div class="col">TOTAL PRICE</div>
+            <div class="col text-right">&#8377;<%= cart.total %></div>
+          </div>
         </div>
       </div>
-    <% }); %>
-  </div>
-    </div>
-  </div>
-  <div class="container">
-    <div class="actions">
 
-      <a href="#" class="btn action__submit" style="background-color: blueviolet;">Place your Order
-        <i class="icon icon-arrow-right-circle"></i>
-      </a>
-      <a href="#" class="backBtn">Go Back to Shop</a>
+      <div class="col-md-8 payment__shipping" id="shippingInfoContainer" style="margin-left: 170px;">
+        <div class="payment__title">
+          <i class="icon icon-plane"></i> Select Shipping Address
+        </div>
+        <button class="btn btn-primary profile-button" id="openAddressModal" type="button" style="background-color: blueviolet;">
+          <i class="fas fa-plus"></i> Add Address
+        </button>
 
-    </div>
-</section>
+        <%- include('./addaddress') %>
+
+      </div>
+
+      <div class="container">
+        <!-- <div class="actions"> -->
+          <form action="/placeOrder" method="post">
+            <div class="addresses-container">
+              <% addresses.forEach(address => { %>
+                <div class="details__user" id="<%= 'user_' + address._id %>">
+                  <input type="radio" name="selectedAddress" id="<%= 'radio_' + address._id %>" value="<%= address._id %>">
+                  <div class="user__name">
+                    <%= address.name %><br>
+                    Shipping Address: <%= address.buildingname %>, <%= address.street %>, <%= address.city %>, <%= address.state %>, <%= address.pincode %>, TYPE:<%= address.addresstype %><br>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+            <div class="payment">
+              <div class="payment__title">
+                Payment Method
+              </div>
+      
+              <div class="payment__types">
+                <div class="payment__type payment__type--cc active">
+                  <input type="radio" name="paymentMethod" id="paymentCC" value="CASH_ON_DELIVERY">
+                  <label for="paymentCC"><i class="icon icon-credit-card"></i>CASH ON DELIVERY</label>
+                </div>
+                <div class="payment__type payment__type--paypal">
+                  <input type="radio" name="paymentMethod" id="paymentWallet" value="WALLET">
+                  <label for="paymentWallet"><i class="icon icon-paypal"></i>WALLET</label>
+                </div>
+                <div class="payment__type payment__type--paypal">
+                  <input type="radio" name="paymentMethod" id="paymentRazorpay" value="RAZORPAY">
+                  <label for="paymentRazorpay"><i class="icon icon-wallet"></i>RAZORPAY</label>
+                </div>
+              </div>
+      
+          <button type="submit" class="btn action__submit" id="placeorderButton" style="background-color: blueviolet;">Place your Order
+            <i class="icon icon-arrow-right-circle"></i>
+          </button>
+          <a href="#" class="backBtn">Go Back to Shop</a>
+        </div>
+      </div>
+    </form>
+  </div>
+<!-- </section> -->
+
+
+
 <script>
   document.getElementById('openAddressModal').addEventListener('click', function () {
       $('#addressModal').modal('show');
@@ -548,9 +560,8 @@ input[type="text"] {
       const response = await fetch('/getaddresses');
       const addresses = await response.json();
 
-      // Render addresses in the DOM
-      const addressesContainer = document.getElementById('addressesContainer');
-      addresses.forEach(address => {
+        const addressesContainer = document.getElementById('addressesContainer');
+        addresses.forEach(address => {
         const addressDiv = document.createElement('div');
         addressDiv.className = 'user__name';
         addressDiv.innerHTML = `${address.name}<br>${address.dob}<br>Shipping Address: ${address.street}, ${address.city}<br>${address.country}`;
@@ -562,5 +573,7 @@ input[type="text"] {
   }
   window.onload = fetchAddresses;
 </script>
+
+
 </div>
 <%- include('./footer') %>

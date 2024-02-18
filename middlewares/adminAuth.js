@@ -2,22 +2,22 @@ const express = require('express')
 const session = require('express-session')
 
 //isAuth middleware
-const isadminAuth =  (req, res, next) => {
+const isadminAuth = (req, res, next) => {
+  if (req.session.isadminAuth) {
+    next();
+  } else {
+    res.redirect('/admin')
+  }
+};
+
+module.exports = {
+  isadminlogged: (req, res, next) => {
     if (req.session.isadminAuth) {
-      next();
-    } else {
-      res.redirect('/admin')
+      res.redirect('/dashboard')
     }
-  }; 
-
-module.exports={
-    isadminlogged:(req,res,next)=>{
-     if(req.session.isadminAuth){
-        res.redirect('/dashboard')
-     }
-     else{
-        next()
-     }
-    } 
-
+    else {
+      next()
     }
+  }
+
+}

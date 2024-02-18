@@ -77,22 +77,5 @@
             addresstype: document.querySelector('input[name="addressType"]:checked').value
         };
 
-        fetch('/saveAddress', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(addressData),
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Address saved:', data);
-
-            document.getElementById('addressForm').reset();
-
-           
-            $('#addressModal').modal('hide');
-        })
-        .catch(error => console.error('Error saving address:', error));
     });
 </script>

@@ -1,0 +1,107 @@
+<%-include('. /sidebar') %>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    #content {
+      margin-left: 150px;
+      padding: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #333;
+      color: white;
+    }
+  </style>
+  <div id="content">
+    <h1>Orders</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Order ID</th>
+          <th>User ID</th>
+          <th>Purchased On</th>
+          <th>Payment Method</th>
+          <th>Total Price</th>
+          <th>Status</th>
+          <th>View</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach((order, index)=> { %>
+          <tr>
+            <td>
+              <%= index + 1 %>
+            </td>
+            <td>
+              <%= order._id %>
+            </td>
+            <td>
+              <%= order.user._id%>
+            </td>
+            <td>
+              <%= order.orderdate.toDateString() %>
+            </td>
+            <td>
+              <%= order.paymentMethod %>
+            </td>
+            <td>
+              <%= order.totalAmount %>
+            </td>
+            <td>
+              <select name="orderStatus" id="orderStatus_<%= order._id %>"
+                onchange="updateOrderStatus('<%= order._id %>')">
+                <option value="PENDING" <%=order.orderStatus==='PENDING' ? 'selected' : '' %>>Pending</option>
+                <option value="PROCESSING" <%=order.orderStatus==='PROCESSING' ? 'selected' : '' %>>Processing</option>
+                <option value="SHIPPED" <%=order.orderStatus==='SHIPPED' ? 'selected' : '' %>>Shipped</option>
+                <option value="DELIVERED" <%=order.orderStatus==='DELIVERED' ? 'selected' : '' %>>Delivered</option>
+                <option value="CANCELLED" <%=order.orderStatus==='CANCELLED' ? 'selected' : '' %>>Cancelled</option>
+              </select>
+            </td>
+            <td><a href="/ordersview/<%= order._id %>">View</a></td>
+          </tr>
+          <% }); %>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function updateOrderStatus(orderId) {
+      const newOrderStatus = document.getElementById(`orderStatus_${orderId}`).value;
+
+      fetch(`/updateOrderStatus/${orderId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ orderStatus: newOrderStatus }),
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(updatedOrder => {
+          console.log('Order status updated:', updatedOrder);
+        })
+        .catch(error => console.error('Error updating order status:', error));
+    }
+  </script>

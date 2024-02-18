@@ -190,7 +190,7 @@ a:hover{
             </div>
             <form>
                 <p>SHIPPING</p>
-                <select><option class="text-muted">Standard-Delivery- &euro;5.00</option></select>
+                <!-- <select><option class="text-muted">Standard-Delivery- &euro;5.00</option></select> -->
                 <p>APPLY COUPON</p>
                 <input id="code" placeholder="Enter coupon code">
             </form>
@@ -198,7 +198,7 @@ a:hover{
                 <div class="col">TOTAL PRICE</div>
                 <div class="col text-right">&#8377;<%= data.total%></div>
             </div>
-            <button class="btn"><a href='/proceedtocheckout'>PROCEED TO CHECKOUT</a></button>
+            <a id="proceedToCheckoutButton" href='/proceedtocheckout'><button class="btn">PROCEED TO CHECKOUT</button></a>
         </div>
     </div>
 
@@ -232,7 +232,8 @@ a:hover{
       window.location.reload()
   } 
 
-  
+
+
 
 </script>
 </div>
