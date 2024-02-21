@@ -15,16 +15,20 @@ const checkoutcontroller = require('../Controller/checkoutcontroller')
 const ordercontroller = require('../Controller/ordercontroller')
 
 
-
+//user
 router.get(['/', '/home'], usercontroller.homepage)
 router.get('/signup', isAuth.islogged, usercontroller.signup)
 router.get('/login', isAuth.userexist, usercontroller.loginpage)
 router.post('/login', usercontroller.tologin)
-router.get('/category/:categoryId', productcontroller.getproductsCategorywise)
-router.get('/products/:id', productcontroller.getproductdetails)
 router.get('/Login', usercontroller.Login)
 router.get('/usericon', usercontroller.userIcon)
 router.post('/editprofiledetails', usercontroller.editprofiledetails)
+
+//products
+router.get('/category/:categoryId', productcontroller.getproductsCategorywise)
+router.get('/products/:id', productcontroller.getproductdetails)
+router.get('/seeallproducts', productcontroller.getAllProducts)
+
 
 //address
 router.get('/address', usercontroller.getaddressbook)

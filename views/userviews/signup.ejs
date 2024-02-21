@@ -11,12 +11,9 @@
             <div class="card-body mx-auto">
               <h4 class="card-title mt-3 text-center">Create Account</h4>
               
-              <!-- <p>
-                <a href="" class="btn btn-block btn-primary">
-                  <i class="fab fa-facebook-f mr-2"></i>Login via facebook</a>
-              </p> -->
               <p class="text-muted font-weight-bold ">
               </p>
+              
               <form action="/signup" method="post">
                 <div class="form-group input-group">
                   <div class="input-group-prepend">
@@ -61,18 +58,3 @@
   </section>
   
 <%-include('./footer')%>
-<script>
-  function validateForm() {
-    const password = document.getElementById('password').value;
-
-   
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-    if (!passwordRegex.test(password)) {
-      alert("Password must contain at least one uppercase letter, one lowercase letter, one special character, and be at least 8 characters long");
-      return false; 
-    }
-
-    return true; 
-  }
-</script>

@@ -183,6 +183,30 @@ module.exports = {
     }
   },
 
+
+  //get all products page
+  getAllProducts: async (req, res) => {
+    try {
+        const allProducts = await Product.find();
+        const category = await Category.find().exec();
+
+        if (req.query.sortOption === 'priceLowToHigh') {
+          allProducts.sort((a, b) => a.price - b.price);
+        } else if (req.query.sortOption === 'priceHighToLow') {
+          allProducts.sort((a, b) => b.price - a.price);
+        }
+
+        res.render('userviews/allproducts', {
+            title: 'All Products',
+            allProducts: allProducts,
+            category: category, 
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+},
+
 };
 
 

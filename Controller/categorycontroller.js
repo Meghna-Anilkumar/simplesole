@@ -11,21 +11,31 @@ module.exports = {
   //to add new category
   addNewCat: async (req, res) => {
     try {
-      const category = new Category({
-        name: req.body.name
-      });
+      const { name } = req.body;
+  
+      // Check if the category name already exists
+      const existingCategory = await Category.findOne({ name });
+  
+      if (existingCategory) {
+        return res.status(400).json({ message: 'Category with this name already exists', type: 'danger' });
+      }
+  
 
+      const category = new Category({
+        name
+      });
+  
       await category.save();
-      console.log('category added successfully')
+      console.log('Category added successfully')
       req.session.message = {
         type: 'success',
         message: 'Category added successfully'
       };
-
+  
       res.redirect('/categories');
     } catch (error) {
       console.error(error);
-      res.json({ message: error.message, type: 'danger' });
+      res.status(500).json({ message: 'Internal Server Error', type: 'danger' });
     }
   },
 

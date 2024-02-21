@@ -1,6 +1,7 @@
 const User = require('../models/user')
 const bcrypt = require('bcrypt')
 const Category = require('../models/category')
+const Product = require('../models/product')
 const session = require('express-session')
 const UserDetails = require('../models/userdetails')
 const bodyParser = require('body-parser')
@@ -13,10 +14,13 @@ module.exports = {
     try {
 
       const category = await Category.find().exec();
+      const newArrivals = await Product.find({ dateCreated: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } })
+            .sort({ dateCreated: -1 });
 
       res.render('userviews/home', {
         title: 'Home',
         category: category,
+        newArrivals: newArrivals,
       });
     } catch (error) {
       console.error(error);
@@ -39,33 +43,35 @@ module.exports = {
   //to login
   tologin: async (req, res) => {
     try {
-
       const { email, password } = req.body;
-
       const user = await User.findOne({ email: email });
-
+  
       if (!user || user.blocked) {
+        req.session.message = {
+          type: 'danger',
+          message: 'Invalid user ID or password',
+        };
         return res.redirect('/login');
       }
-
+  
       const isMatch = await bcrypt.compare(password, user.password);
-
-      console.log('isMatch:', isMatch);
-
+  
       if (isMatch) {
         req.session.isAuth = true;
         req.session.user = user;
         console.log('Redirecting to /');
         return res.redirect('/');
-
       } else {
+        req.session.message = {
+          type: 'danger',
+          message: 'Invalid credentials',
+        };
         console.log('Incorrect password');
         return res.redirect('/login');
-
       }
     } catch (error) {
       console.error(error);
-      res.status(500).send('Internal Server Error');
+      res.json({ message: error.message, type: 'danger' });
     }
   },
 

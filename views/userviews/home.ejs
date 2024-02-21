@@ -1,7 +1,36 @@
 <%-include('./header')%>
-<div class="banner-container">
+  <div class="banner-container">
     <img src="/images/party.webp" alt="Banner Image" class="img-fluid" style="width: 100%;">
   </div>
+
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-12 text-center mb-4">
+        <h2>NEW ARRIVALS</h2>
+    </div>
+        <% newArrivals.forEach(product => { %>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="image-container">
+                      <a href="/products/<%= product._id %>">
+                        <img src="/<%= product.images[0] %>" class="img-fluid rounded thumbnail-image">
+                        </a>
+                    </div>
+
+                    <div class="product-detail-container p-2">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="dress-name"><%= product.name %></h5>
+                            <div class="d-flex flex-column mb-2">
+                                <span class="new-price">₹<%= product.price.toFixed(2) %></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    </div>
+</div>
+<br>
 
   <footer class="bg-dark text-light py-4">
     <div class="container">
@@ -29,4 +58,4 @@
       </div>
     </div>
   </footer>
-<%-include('./footer')%>
+  <%-include('./footer')%>

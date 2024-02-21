@@ -119,16 +119,18 @@
     color: #0000ff;
   }
 </style>
-<% if(message) { %>
-  <div class="alert alert-dismissable fade show alert-<%= message.type %>"role="alert">
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></button>
-    <strong><%=message.message %></strong>
-  </div>
- <% } %>
+
 
 <div class="loginBox"> <img class="user" src="https://i.ibb.co/yVGxFPR/2.png" height="100px" width="100px">
   <h3>Log in Now</h3>
-
+  <% if (message) { %>
+    <div class="alert alert-dismissable fade show alert-<%= message.type %>" role="alert">
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></button>
+      <strong>
+        <%= message.message %>
+      </strong>
+    </div>
+  <% } %>
  
   <form action="/login" method="post">
       <div class="inputBox"> <input id="email" type="email" name="email" placeholder="Enter email id"> <input id="pass" type="password" name="password" placeholder="Enter Password"> </div> <input type="submit" name="" value="Login">
@@ -137,7 +139,21 @@
  <br>
       <a href="/signup" style="color: #4e1378;">Sign Up</a>
   
-  
 </div>
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+  // Get the URL parameters
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get('error');
+
+  // Display error message if present
+  if (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Oops...',
+      text: 'Invalid email or password. Please try again.',
+    });
+  }
+</script> -->
 
   <%-include('./footer')%>
