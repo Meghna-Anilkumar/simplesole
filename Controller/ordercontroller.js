@@ -21,6 +21,15 @@ module.exports = {
         paymentMethod,
 
       });
+
+      await Promise.all(cart.items.map(async item => {
+        const product = await Product.findById(item.product._id);
+        if (product) {
+            product.stock -= item.quantity;
+            await product.save();
+        }
+    }));
+    
       await newOrder.save();
 
       cart.items = [];

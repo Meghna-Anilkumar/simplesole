@@ -26,7 +26,7 @@ const orderSchema = new mongoose.Schema({
     shippingAddress: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Address',
-        // required: true
+        required: true
     },
     totalAmount: {
         type: Number,
@@ -35,12 +35,12 @@ const orderSchema = new mongoose.Schema({
     paymentMethod: {
         type: String,
         enum: ['CASH_ON_DELIVERY', 'WALLET', 'RAZORPAY'],
-        // required: true
+        required: true
     },
     orderStatus: {
         type: String,
         enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
-        // default: 'PENDING'
+        default: 'PENDING'
     },
     orderdate: {
         type: Date,

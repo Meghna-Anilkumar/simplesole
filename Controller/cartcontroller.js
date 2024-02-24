@@ -14,7 +14,7 @@ module.exports = {
       const cart = await Cart.findOne({ user }).populate('items.product').exec();
 
       if (!cart) {
-        return res.render('userviews/cart', { title: 'Cart', category: [], data: { total: 0 } });
+        return res.render('userviews/cart', { title: 'Cart', category: [], data: { total: 0 } ,cart});
       }
 
       const categories = await Category.find();
@@ -72,33 +72,54 @@ module.exports = {
       console.error('Error:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
-
+ 
   },
-
-
+  
   //update quantity in cart
   updatequantity: async (req, res) => {
     const { productId, change } = req.params;
 
     try {
-      const updatedItem = await Cart.findOneAndUpdate(
-        { 'items.product': productId },
-        { $inc: { 'items.$.quantity': parseInt(change, 10) } },
-        { new: true }
-      );
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+        
+        const currentStock = product.stock;
 
-      if (!updatedItem) {
-        return res.status(404).json({ error: 'Item not found in the cart' });
-      }
+        const cartItem = await Cart.findOne({ 'items.product': productId });
+        if (!cartItem) {
+            return res.status(404).json({ error: 'Item not found in the cart' });
+        }
 
-      const updatedQuantity = updatedItem.items.find(item => item.product.toString() === productId).quantity;
-      const total = calculateTotalPrice(updatedItem.items)
-      res.json({ quantity: updatedQuantity, total });
+        const currentQuantity = cartItem.items.find(item => item.product.toString() === productId).quantity;
+
+        const newQuantity = parseInt(currentQuantity, 10) + parseInt(change, 10);
+
+        if (newQuantity < 1) {
+            return res.status(400).json({ error: 'Quantity cannot be less than 1' });
+        }
+
+        if (newQuantity > currentStock) {
+            return res.status(400).json({ error: 'Quantity exceeds available stock' });
+        }
+
+        const updatedItem = await Cart.findOneAndUpdate(
+            { 'items.product': productId },
+            { $set: { 'items.$.quantity': newQuantity } },
+            { new: true }
+        );
+
+        const updatedQuantity = updatedItem.items.find(item => item.product.toString() === productId).quantity;
+
+        const total = calculateTotalPrice(updatedItem.items);
+        res.json({ quantity: updatedQuantity, total });
     } catch (error) {
-      console.error('Error updating quantity:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error updating quantity:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  },
+},
+
 
   //delete an item from cart
   deleteitem: async (req, res) => {

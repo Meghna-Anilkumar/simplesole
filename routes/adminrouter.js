@@ -15,6 +15,7 @@ const isAuth = require('../middlewares/isAuth')
 const adminAuth = require('../middlewares/adminAuth')
 const adminordercontroller = require('../Controller/adminordercontroller')
 
+router.get('/adminlogin', admincontroller.toadminlogin)
 router.post('/signup', customercontroller.register)
 router.get('/dashboard', admincontroller.dashboard)
 router.get('/customers', customercontroller.customers)
@@ -34,6 +35,9 @@ router.get('/editProduct/:id', productcontroller.editproduct)
 router.post('/updateProduct/:id', uploadMiddleware, productcontroller.updateproduct)
 router.post('/verify-otp', customercontroller.verifyotp)
 router.post('/blockProduct', productcontroller.blockProduct)
+
+//admin logout
+router.get('/adminlogout',admincontroller.adminlogout)
 
 //orders
 router.get('/adminorders', adminordercontroller.orderspage)

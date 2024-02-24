@@ -22,7 +22,7 @@ module.exports = {
       req.body.email == credential.email &&
       req.body.password == credential.password
     ) {
-      req.session.isadminAuth = true
+      req.session.isadminlogged = true
       res.render('adminviews/dashboard', { title: 'Admin Dashboard' });
     }
     else {
@@ -36,7 +36,23 @@ module.exports = {
       title: 'Dashboard'
     }
     )
-  }
+  },
+
+  //admin logout
+  adminlogout: async (req, res) => {
+
+    console.log('Accessed /adminlogout');
+    req.session.isadminlogged = false
+
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Error destroying session:', err);
+            res.status(500).send('Internal Server Error');
+        } else {
+            res.redirect('/adminlogin')
+        }
+    })
+},
 
 
 

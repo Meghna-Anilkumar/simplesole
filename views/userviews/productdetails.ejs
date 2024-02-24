@@ -7,14 +7,14 @@
 
 .nav-link:not(:last-child) {
     color: white;
-    margin-right: 10px; /* Adjust the value to your desired spacing */
+    margin-right: 10px;
 }
 #signupbody{
     padding-top:50px;
     background-image: url(/images/wallpaper.jpg);
     background-size: cover;
     background-position: center;
-    width: 100%; /* Set the width of your div */
+    width: 100%; 
 }
 #loginbody{
     padding-top:50px;
@@ -31,10 +31,10 @@
     height: 80px;
 }
 
-  body {
+  /* body {
   font-family: 'open sans';
   overflow-x: hidden;
-}
+} */
 
 img {
   max-width: 70%;
@@ -121,7 +121,7 @@ img {
 
 .checked,
 .price span {
-  color: #ff9f1a;
+  color:  rgb(255, 63, 108);
 }
 
 .product-title,
@@ -160,7 +160,7 @@ img {
 
 .add-to-cart,
 .like {
-  background: #ff9f1a;
+  background: rgb(255, 63, 108);
   padding: 1.2em 1.5em;
   border: none;
   text-transform: uppercase;
@@ -171,7 +171,7 @@ img {
 
 .add-to-cart:hover,
 .like:hover {
-  background: #b36800;
+  background:  rgb(255, 63, 108);
   color: #fff;
 }
 
@@ -183,18 +183,6 @@ img {
 .not-available:before {
   content: "\f00d";
   color: #fff;
-}
-
-.orange {
-  background: #ff9f1a;
-}
-
-.green {
-  background: #85ad00;
-}
-
-.blue {
-  background: #0076ad;
 }
 
 .tooltip-inner {
@@ -215,12 +203,16 @@ img {
   }
 }
 </style>
+
 <div class=" contant container">
   <div class="card">
       <div class="container-fluid">
           <div class="row">
               <div class="col-md-6">
                   <h2><%= product.name %></h2>
+                  <% if (product.stock < 1) { %>
+                    <p class="out-of-stock" style="color: red;">Out of Stock</p>
+                <% }  %>
                   <div id="carouselExample" class="carousel slide" data-bs-ride="carousel">
                       <div class="carousel-inner">
                           <% product.images.forEach((image, index) => { %>
@@ -248,53 +240,55 @@ img {
                   </div>
               </div>
               <div class="col-md-6">
-                  <h3 class="product-title">Category:<%= product.category.name%></h3>
-                  
-                  <p class="product-description"><%= product.description %></p>
-                  <h4 class="price">current price: <span>&#8377;<%= product.price %></span></h4>
-                  
-                  <h5 class="sizes">size:
-                     
-                      <% product.size.forEach(size => { %>
-                          <span class="size" data-bs-toggle="tooltip" title="<%= size %>"><%= size %></span>
-                      <% }); %>
-                  </h5>
-                  <h5 class="colors">color:
+                <h3 class="product-title">Category:<%= product.category.name%></h3>
+                
+                <p class="product-description"><%= product.description %></p>
+                <h4 class="price">current price: <span>&#8377;<%= product.price %></span></h4>
+                
+                <h5 class="sizes">size:
+                    <% product.size.forEach(size => { %>
+                        <span class="size" data-bs-toggle="tooltip" title="<%= size %>"><%= size %></span>
+                    <% }); %>
+                </h5>
+                
+                <h5 class="colors">color:
                     <span class="color <%= product.color%>"></span>
-                  </h5>
-                  <h5 class="quantity">Quantity:
-                    <input type="number" class="quantity-input" value="1" min="1" required>
-                  </h5>
-                  <div class="action">
-                      <button class="add-to-cart btn btn-primary" type="button">add to cart</button>
-                      <button class="like btn btn-danger" type="button"><span class="fa fa-heart"></span></button>
-                  </div>
-              </div>
+                </h5>
+                
+                <h5 class="quantity">Quantity:
+                  <input 
+                      type="number" 
+                      class="quantity-input" 
+                      value="1" 
+                      min="1" 
+                      max="<%= product.stock %>" 
+                      <% if (product.stock < 1) { %>disabled<% } %> 
+                      required
+                      pattern="[1-9]\d*" 
+                      oninput="validity.valid||(value='');"
+                  >
+              </h5>
+                <% if (product.stock >= 1) { %>
+                    <div class="action">
+                        <button class="add-to-cart btn btn-primary" type="button">add to cart</button>
+                        <button class="like btn btn-danger" type="button"><span class="fa fa-heart"></span></button>
+                    </div>
+                <% } else { %>
+                    <div class="action" style="pointer-events: none; opacity: 0.5;">
+                        <button class="add-to-cart btn btn-primary" type="button" disabled>Out of Stock</button>
+                        <button class="like btn btn-danger" type="button" disabled><span class="fa fa-heart"></span></button>
+                    </div>
+                <% } %>
+            </div>
           </div>
       </div>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-<script>
-  function addToCart() {
-    const quantity = document.querySelector('.quantity-input').value;
-     
-    if (quantity === '0') {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Quantity cannot be zero!',
-      });
-    } else {
-     
-      console.log('Adding to cart with quantity:', quantity);
-    }
-  }
-</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const addToCartButton = document.querySelector('.add-to-cart');
+    const addToCartButton = document.querySelector('.add-to-cart')
     
     addToCartButton.addEventListener('click', function () {
       const productId = '<%= product._id %>';

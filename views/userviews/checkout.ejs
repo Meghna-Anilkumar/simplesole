@@ -1,579 +1,564 @@
 <%-include('./header')%>
-<style>
-
-    .summary{
-    background-color: #ddd;
-    border-top-right-radius: 1rem;
-    border-bottom-right-radius: 1rem;
-    padding: 4vh;
-    color: rgb(65, 65, 65);
-}
-@media(max-width:767px){
-    .summary{
-    border-top-right-radius: unset;
-    border-bottom-left-radius: 1rem;
+  <style>
+    .summary {
+      background-color: #ddd;
+      border-radius: 8px;
+      /* border-bottom-right-radius: 1rem; */
+      padding: 4vh;
+      color: rgb(65, 65, 65);
     }
-}
-.summary .col-2{
-    padding: 0;
-}
-.summary .col-10
-{
-    padding: 0;
-}.row{
-    margin: 0;
-}
- .content {
-  margin-left: 150px; 
-}
-.container {
-  max-width: 100%;
-} 
-*,
-*:after,
-*:before {
-  box-sizing: border-box;
-}
 
-ul {
-  padding-left: 10px;
-}
+    @media(max-width:767px) {
+      .summary {
+        border-top-right-radius: unset;
+        border-bottom-left-radius: 1rem;
+      }
+    }
 
-body {
+    .summary .col-2 {
+      padding: 0;
+    }
+
+    .summary .col-10 {
+      padding: 0;
+    }
+
+    .row {
+      margin: 0;
+    }
+
+    .content {
+      margin-left: 150px;
+    }
+
+    .container {
+      max-width: 100%;
+    }
+
+    *,
+    *:after,
+    *:before {
+      box-sizing: border-box;
+    }
+
+    ul {
+      padding-left: 10px;
+    }
+
+    /* body {
   font-family: "Josefin Sans", sans-serif;
   color: #0a0a0a;
   line-height: 1.4;
-}
+} */
 
-a {
-  color: #000;
-}
+    a {
+      color: #000;
+    }
 
-/* .content {
+    /* .content {
   z-index: 9999;
 } */
 
-.secure,
-.backBtn {
-  display: flex;
-}
-.secure span,
-.backBtn span {
-  margin-left: 5px;
-}
+    .secure,
+    .backBtn {
+      display: flex;
+    }
 
-.backBtn {
-  margin-top: 20px;
-}
+    .secure span,
+    .backBtn span {
+      margin-left: 5px;
+    }
 
-.secure {
-  color: #afb5c0;
-  align-items: flex-end;
-}
-.secure .icon {
-  font-size: 20px;
-  line-height: 20px;
-}
+    .backBtn {
+      margin-top: 20px;
+    }
 
-.logo {
-  font-size: 20px;
-  font-weight: bold;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-.logo .icon {
-  font-size: 32px;
-  line-height: 32px;
-  margin-right: 5px;
-}
+    .secure {
+      color: #afb5c0;
+      align-items: flex-end;
+    }
 
-img {
-  width: 100%;
-  border-radius: 8px 0 0 8px;
-}
+    .secure .icon {
+      font-size: 20px;
+      line-height: 20px;
+    }
 
-.details {
-  max-width: 800px;
-  min-height: 300px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: -200px;
-  background: #fff;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-.details__item {
-  display: flex;
-}
-.details__user {
-  background: #f6f9fc;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #dadada;
-}
+    .logo {
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
 
-.item__quantity {
-  position: absolute;
-  right: 50px;
-  top: 30px;
-  font-size: 20px;
-}
-.item__image {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.item__image .iphone {
-  margin-top: -50px;
-  margin-left: -100px;
-  width: 200px;
-}
-.item__details {
-  padding: 30px;
-}
-.item__title {
-  font-size: 28px;
-  font-weight: 600;
-}
-.item__price {
-  font-size: 22px;
-  color: #bec3cb;
-}
+    .logo .icon {
+      font-size: 32px;
+      line-height: 32px;
+      margin-right: 5px;
+    }
 
-.icon {
-  font-size: 16px;
-  vertical-align: middle;
-}
+    img {
+      width: 100%;
+      border-radius: 8px 0 0 8px;
+    }
 
-header {
-  background-color: #f6f9fc;
-  min-height: 500px;
-  background-image: url("../images/pattern.png");
-}
+    .details {
+      max-width: 800px;
+      min-height: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: -200px;
+      background: #fff;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
 
-.navigation {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 50px 0 80px 0;
-  color: #246eea;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 700;
-}
+    .details__item {
+      display: flex;
+    }
 
-.container {
-  width: 960px;
-  margin: 0 auto;
-}
+    .details__user {
+      background: #f6f9fc;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #dadada;
+    }
 
-.shadow {
-  box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
-}
+    .item__quantity {
+      position: absolute;
+      right: 50px;
+      top: 30px;
+      font-size: 20px;
+    }
 
-.row {
-  display: flex;
-}
+    .item__image {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-.txt {
-  border-color: #e1e8ee;
-  width: 100%;
-}
+    .item__image .iphone {
+      margin-top: -50px;
+      margin-left: -100px;
+      width: 200px;
+    }
 
-.input {
-  border-radius: 5px;
-  border-style: solid;
-  border-width: 2px;
-  height: 48px;
-  padding-left: 15px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #5e6977;
-}
+    .item__details {
+      padding: 30px;
+    }
 
-input[type="text"] {
-  display: initial;
-  padding: 15px;
-}
+    .item__title {
+      font-size: 28px;
+      font-weight: 600;
+    }
 
-.text-validated {
-  border-color: #7dc855;
-  background-image: url("../images/icon-tick.png");
-  background-repeat: no-repeat;
-  background-position: right 18px center;
-}
+    .item__price {
+      font-size: 22px;
+      color: #bec3cb;
+    }
 
-.ddl {
-  border-color: #f0f4f7;
-  background-color: #f0f4f7;
-  width: 100px;
-  margin-right: 10px;
-}
+    .icon {
+      font-size: 16px;
+      vertical-align: middle;
+    }
 
-.title {
-  font-size: 14px;
-  padding-bottom: 8px;
-}
+    header {
+      background-color: #f6f9fc;
+      min-height: 500px;
+      background-image: url("../images/pattern.png");
+    }
 
-.field {
-  padding-top: 15px;
-  padding-right: 30px;
-  width: 50%;
-}
-.field.small {
-  width: auto;
-}
+    .navigation {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 50px 0 80px 0;
+      color: #246eea;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
 
-.notification {
-  text-align: center;
-  font-size: 28px;
-  font-weight: 600;
-  display: flex;
-  justify-content: center;
-}
-.notification .icon {
-  font-size: 28px;
-  color: #7dc855;
-  line-height: 28px;
-  margin-right: 10px;
-}
+    .container {
+      width: 960px;
+      margin: 0 auto;
+    }
 
-.actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  padding: 60px 0 40px 0;
-}
+    .shadow {
+      box-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+    }
 
-.payment {
-  padding: 20px 0 0 0;
-}
-.payment__title {
-  margin: 40px 0 20px 0;
-  font-size: 18px;
-  display: flex;
-  text-align: left;
-}
-.payment__title .icon {
-  margin-right: 10px;
-}
+    .row {
+      display: flex;
+    }
 
-.btn {
-  font-family: "Josefin Sans", sans-serif;
-  border-radius: 8px;
-  border: 0;
-  letter-spacing: 1px;
-  color: #fff;
-  background: #246eea;
-  padding: 20px 60px;
-  white-space: nowrap;
-  font-size: 16px;
-  line-height: 1;
-  text-transform: uppercase;
-  transition: all 0.15s ease;
-  text-decoration: none;
-}
-.btn .icon {
-  margin-left: 10px;
-  font-size: 20px;
-}
-.btn:hover {
-  -webkit-transform: translateY(-1px);
-          transform: translateY(-1px);
-  background: #4984ea;
-}
-.btn.action__back {
-  background: transparent;
-  color: #a0a0a0;
-}
+    .txt {
+      border-color: #e1e8ee;
+      width: 100%;
+    }
 
-.payment__types {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+    .input {
+      border-radius: 5px;
+      border-style: solid;
+      border-width: 2px;
+      height: 48px;
+      padding-left: 15px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #5e6977;
+    }
 
-.payment__info {
-  display: flex;
-}
+    input[type="text"] {
+      display: initial;
+      padding: 15px;
+    }
 
-.payment__cc {
-  flex: 60%;
-}
+    .text-validated {
+      border-color: #7dc855;
+      background-image: url("../images/icon-tick.png");
+      background-repeat: no-repeat;
+      background-position: right 18px center;
+    }
 
-.payment__shipping {
-  flex: 40%;
-}
+    .ddl {
+      border-color: #f0f4f7;
+      background-color: #f0f4f7;
+      width: 100px;
+      margin-right: 10px;
+    }
 
-.shipping__info {
-  background: #f6f9fc;
-  padding: 10px;
-  border-radius: 8px;
-}
+    .title {
+      font-size: 14px;
+      padding-bottom: 8px;
+    }
 
-.payment__type {
-  display: flex;
-  border: 2px solid #d9d9d9;
-  border-radius: 8px;
-  padding: 20px 40px;
-  width: 100%;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  color: #d9d9d9;
-  transition: all 0.15s ease;
-}
-.payment__type:hover {
-  -webkit-transform: translateY(-1px);
-          transform: translateY(-1px);
-}
-.payment__type.active {
-  color: #0a0a0a;
-  background: #f6fcf7;
-  border-color: #7dc855;
-}
-.payment__type .icon {
-  font-size: 32px;
-  margin-right: 10px;
-}
-.payment__type + .payment__type {
-  margin-left: 10px;
-}
+    .field {
+      padding-top: 15px;
+      padding-right: 30px;
+      width: 50%;
+    }
 
-.icon-xl {
-  font-size: 48px;
-  line-height: 48px;
-}
+    .field.small {
+      width: auto;
+    }
 
-.content {
-  display: block;
-}
+    .notification {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 600;
+      display: flex;
+      justify-content: center;
+    }
 
-.thankyou {
-  display: block;
-}
-.thankyou .details {
-  opacity: 1;
-  justify-content: center;
-  align-items: center;
-}
-.thankyou .details h3 {
-  font-weight: 600;
-}
-.thankyou .details__item {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.thankyou .details__item .icon-xl {
-  font-size: 32px;
-  color: #7dc855;
-  line-height: 32px;
-}
+    .notification .icon {
+      font-size: 28px;
+      color: #7dc855;
+      line-height: 28px;
+      margin-right: 10px;
+    }
 
-.loading {
-  position: relative;
-}
-.loading:after {
-  -webkit-animation: spinAround .5s infinite linear;
-          animation: spinAround .5s infinite linear;
-  border: 4px solid #7dc855;
-  border-radius: 290486px;
-  border-right-color: transparent;
-  border-top-color: transparent;
-  content: "";
-  height: 5em;
-  width: 5em;
-  position: absolute;
-}
-.loading .details__item {
-  opacity: 0;
-}
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 60px 0 40px 0;
+    }
 
-@-webkit-keyframes spinAround {
-  from {
-    -webkit-transform: rotate(0);
-    transform: rotate(0);
-  }
-  to {
-    -webkit-transform: rotate(359deg);
-    transform: rotate(359deg);
-  }
-}
+    .payment {
+      padding: 20px 0 0 0;
+    }
 
-@keyframes spinAround {
-  from {
-    -webkit-transform: rotate(0);
-    transform: rotate(0);
-  }
-  to {
-    -webkit-transform: rotate(359deg);
-    transform: rotate(359deg);
-  }
-}
-</style>
+    .payment__title {
+      margin: 40px 0 20px 0;
+      font-size: 18px;
+      display: flex;
+      text-align: left;
+    }
 
-<div class="container">
-  <div class="navigation">
-    <div class="logo">
-      <i class="icon icon-basket"></i>
-    </div>
-    <div class="secure">
-      <i class="icon icon-shield"></i>
-      <span></span>
-    </div>
-  </div>
-  <div class="notification">
-    Complete Your Purchase
-  </div>
-</div>
+    .payment__title .icon {
+      margin-right: 10px;
+    }
 
-<!-- <section class="content"> -->
+    .btn {
+      font-family: "Josefin Sans", sans-serif;
+      border-radius: 8px;
+      border: 0;
+      letter-spacing: 1px;
+      color: #fff;
+      background: #246eea;
+      padding: 20px 60px;
+      white-space: nowrap;
+      font-size: 16px;
+      line-height: 1;
+      text-transform: uppercase;
+      transition: all 0.15s ease;
+      text-decoration: none;
+    }
+
+    .btn .icon {
+      margin-left: 10px;
+      font-size: 20px;
+    }
+
+    .btn:hover {
+      -webkit-transform: translateY(-1px);
+      transform: translateY(-1px);
+      background: #4984ea;
+    }
+
+    .btn.action__back {
+      background: transparent;
+      color: #a0a0a0;
+    }
+
+    .payment__types {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .payment__info {
+      display: flex;
+    }
+
+    .payment__cc {
+      flex: 60%;
+    }
+
+    .payment__shipping {
+      flex: 40%;
+    }
+
+    .shipping__info {
+      background: #f6f9fc;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    .payment__type {
+      display: flex;
+      border: 2px solid #d9d9d9;
+      border-radius: 8px;
+      padding: 5px 5px;
+      width: 50%;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      color: #0f0606;
+      transition: all 0.15s ease;
+    }
+
+    .payment__type:hover {
+      -webkit-transform: translateY(-1px);
+      transform: translateY(-1px);
+    }
+
+    .payment__type .icon {
+      font-size: 32px;
+      margin-right: 10px;
+    }
+
+    .payment__type+.payment__type {
+      margin-left: 10px;
+    }
+
+    .icon-xl {
+      font-size: 48px;
+      line-height: 48px;
+    }
+
+    .content {
+      display: block;
+    }
+
+    .css-huh2rh {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 2px;
+      background-color: rgb(255, 255, 255) !important;
+      color: rgb(255, 63, 108);
+      border-color: rgb(255, 63, 108);
+      border-width: 1px;
+      border-style: solid;
+      cursor: pointer;
+    }
+
+    .button-base-button {
+      color: #fff;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px;
+      background: #ff3f6c;
+      cursor: pointer;
+      text-align: center;
+      border: none;
+      border-radius: 2px;
+      letter-spacing: 1px;
+    }
+  </style>
+
   <div class="container">
-    
-        <br>
-
-        <div class="col-md-4 summary">
-          <div><h5><b>Summary</b></h5></div>
-          <hr>
-          <div class="row">
-            <div class="col" style="padding-left:0;">
-              <%= cart.items.length %> ITEMS
-            </div>
-            <div class="col text-right">&#8377;<%= cart.total %></div>
-          </div>
-
-          <p>SHIPPING</p>
-
-          <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
-            <div class="col">TOTAL PRICE</div>
-            <div class="col text-right">&#8377;<%= cart.total %></div>
-          </div>
-        </div>
+    <div class="navigation">
+      <div class="logo">
+        <i class="icon icon-basket"></i>
       </div>
-
-      <div class="col-md-8 payment__shipping" id="shippingInfoContainer" style="margin-left: 170px;">
-        <div class="payment__title">
-          <i class="icon icon-plane"></i> Select Shipping Address
-        </div>
-        <button class="btn btn-primary profile-button" id="openAddressModal" type="button" style="background-color: blueviolet;">
-          <i class="fas fa-plus"></i> Add Address
-        </button>
-
-        <%- include('./addaddress') %>
-
+      <div class="secure">
+        <i class="icon icon-shield"></i>
+        <span></span>
       </div>
-
-      <div class="container">
-        <!-- <div class="actions"> -->
-          <form action="/placeOrder" method="post">
-            <div class="addresses-container">
-              <% addresses.forEach(address => { %>
-                <div class="details__user" id="<%= 'user_' + address._id %>">
-                  <input type="radio" name="selectedAddress" id="<%= 'radio_' + address._id %>" value="<%= address._id %>">
-                  <div class="user__name">
-                    <%= address.name %><br>
-                    Shipping Address: <%= address.buildingname %>, <%= address.street %>, <%= address.city %>, <%= address.state %>, <%= address.pincode %>, TYPE:<%= address.addresstype %><br>
-                  </div>
-                </div>
-              <% }); %>
-            </div>
-            <div class="payment">
-              <div class="payment__title">
-                Payment Method
-              </div>
-      
-              <div class="payment__types">
-                <div class="payment__type payment__type--cc active">
-                  <input type="radio" name="paymentMethod" id="paymentCC" value="CASH_ON_DELIVERY">
-                  <label for="paymentCC"><i class="icon icon-credit-card"></i>CASH ON DELIVERY</label>
-                </div>
-                <div class="payment__type payment__type--paypal">
-                  <input type="radio" name="paymentMethod" id="paymentWallet" value="WALLET">
-                  <label for="paymentWallet"><i class="icon icon-paypal"></i>WALLET</label>
-                </div>
-                <div class="payment__type payment__type--paypal">
-                  <input type="radio" name="paymentMethod" id="paymentRazorpay" value="RAZORPAY">
-                  <label for="paymentRazorpay"><i class="icon icon-wallet"></i>RAZORPAY</label>
-                </div>
-              </div>
-      
-          <button type="submit" class="btn action__submit" id="placeorderButton" style="background-color: blueviolet;">Place your Order
-            <i class="icon icon-arrow-right-circle"></i>
-          </button>
-          <a href="#" class="backBtn">Go Back to Shop</a>
-        </div>
-      </div>
-    </form>
+    </div>
+    <div class="notification">
+      Complete Your Purchase
+    </div>
   </div>
-<!-- </section> -->
+  <div class="container">
+    <br>
+    <div class="col-md-4 summary">
+      <div>
+        <h5><b>Summary</b></h5>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col" style="padding-left:0;">
+          <%= cart.items.length %> ITEMS
+        </div>
+        <div class="col text-right">&#8377;<%= cart.total %>
+        </div>
+      </div>
+
+      <p>SHIPPING</p>
+
+      <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
+        <div class="col">TOTAL PRICE</div>
+        <div class="col text-right">&#8377;<%= cart.total %>
+        </div>
+      </div>
+    </div>
+  </div>
 
 
+  <div class="col-md-8 payment__shipping" id="shippingInfoContainer" style="margin-left: 170px;">
+    <div class="payment__title">
+      <i class="icon icon-plane"></i> Select Shipping Address
+    </div>
+    <button class="css-huh2rh" id="openAddressModal" type="button" style="background-color: blueviolet;">
+      <i class="fas fa-plus"></i> Add Address
+    </button>
 
-<script>
-  document.getElementById('openAddressModal').addEventListener('click', function () {
+    <%- include('./addaddress') %>
+
+  </div>
+
+  <div class="container">
+    <!-- <div class="actions"> -->
+    <form action="/placeOrder" method="post">
+      <div class="addresses-container">
+        <% addresses.forEach(address=> { %>
+          <div class="details__user" id="<%= 'user_' + address._id %>">
+            <input type="radio" name="selectedAddress" id="<%= 'radio_' + address._id %>" value="<%= address._id %>">
+            <div class="user__name">
+              <%= address.name %><br>
+                Shipping Address: <%= address.buildingname %>, <%= address.street %>, <%= address.city %>, <%=
+                        address.state %>, <%= address.pincode %>, TYPE:<%= address.addresstype %><br>
+            </div>
+          </div>
+          <% }); %>
+      </div>
+
+      <div class="payment">
+        <div class="payment__title">
+          Payment Method
+        </div>
+
+        <div class="payment__types">
+          <div class="payment__type payment__type--cc active">
+            <input type="radio" name="paymentMethod" id="paymentCC" value="CASH_ON_DELIVERY">
+            <label for="paymentCC"><i class="icon icon-credit-card"></i>CASH ON DELIVERY</label>
+          </div>
+          <div class="payment__type payment__type--paypal">
+            <input type="radio" name="paymentMethod" id="paymentWallet" value="WALLET">
+            <label for="paymentWallet"><i class="icon icon-paypal"></i>WALLET</label>
+          </div>
+          <div class="payment__type payment__type--paypal">
+            <input type="radio" name="paymentMethod" id="paymentRazorpay" value="RAZORPAY">
+            <label for="paymentRazorpay"><i class="icon icon-wallet"></i>ONLINE PAYMENT</label>
+          </div>
+        </div>
+
+        <button type="submit" class="button-base-button" id="placeorderButton">Place your Order
+          <i class="icon icon-arrow-right-circle"></i>
+        </button>
+        <a href="#" class="backBtn">Go Back to Shop</a>
+      </div>
+  </div>
+  </form>
+  </div>
+  <!-- </section> -->
+
+
+  <script>
+    document.getElementById('openAddressModal').addEventListener('click', function () {
       $('#addressModal').modal('show');
-  });
+    });
 
-  document.getElementById('addressForm').addEventListener('submit', function (event) {
+    document.getElementById('addressForm').addEventListener('submit', function (event) {
       event.preventDefault();
 
       const addressData = {
-         name: document.getElementById('addressName').value,
-          mobile: document.getElementById('mobileNumber').value,
-          buildingname: document.getElementById('buildingname').value,
-          street: document.getElementById('street').value,
-          city: document.getElementById('city').value,
-          state: document.getElementById('state').value,
-          pincode: document.getElementById('PIN Code').value,
-          addresstype: document.querySelector('input[name="addressType"]:checked').value
+        name: document.getElementById('addressName').value,
+        mobile: document.getElementById('mobileNumber').value,
+        buildingname: document.getElementById('buildingname').value,
+        street: document.getElementById('street').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        pincode: document.getElementById('PIN Code').value,
+        addresstype: document.querySelector('input[name="addressType"]:checked').value
       };
 
       fetch('/saveAddress', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(addressData),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(addressData),
       })
-      .then(response => response.json())
-      .then(data => {
+        .then(response => response.json())
+        .then(data => {
           console.log('Address saved:', data);
 
           document.getElementById('addressForm').reset();
 
           $('#addressModal').modal('hide');
-      })
-      .catch(error => console.error('Error saving address:', error));
+        })
+        .catch(error => console.error('Error saving address:', error));
       window.location.reload();
-  });
+    });
   </script>
-<script>
-  async function fetchAddresses() {
-    try {
-      const response = await fetch('/getaddresses');
-      const addresses = await response.json();
+  <script>
+    async function fetchAddresses() {
+      try {
+        const response = await fetch('/getaddresses');
+        const addresses = await response.json();
 
         const addressesContainer = document.getElementById('addressesContainer');
         addresses.forEach(address => {
-        const addressDiv = document.createElement('div');
-        addressDiv.className = 'user__name';
-        addressDiv.innerHTML = `${address.name}<br>${address.dob}<br>Shipping Address: ${address.street}, ${address.city}<br>${address.country}`;
-        addressesContainer.appendChild(addressDiv);
-      });
-    } catch (error) {
-      console.error('Error fetching addresses:', error);
+          const addressDiv = document.createElement('div');
+          addressDiv.className = 'user__name';
+          addressDiv.innerHTML = `${address.name}<br>${address.dob}<br>Shipping Address: ${address.street}, ${address.city}<br>${address.country}`;
+          addressesContainer.appendChild(addressDiv);
+        });
+      } catch (error) {
+        console.error('Error fetching addresses:', error);
+      }
     }
-  }
-  window.onload = fetchAddresses;
-</script>
+    window.onload = fetchAddresses;
+  </script>
 
 
-</div>
-<%- include('./footer') %>
+  </div>
+  <%- include('./footer') %>

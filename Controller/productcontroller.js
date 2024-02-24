@@ -154,7 +154,7 @@ module.exports = {
 
       const selectedCategory = product.category
 
-      res.render('userviews/productdetails', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products, product: product });
+      res.render('userviews/productdetails', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products, product: product});
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
