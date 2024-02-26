@@ -84,13 +84,14 @@ module.exports = {
     }
   },
 
-  //Update user route(update button click event)
-  updateproduct: async (req, res) => {
-    let id = req.params.id;
-    let new_images = '';
+// Update user route (update button click event)
+updateproduct: async (req, res) => {
+  try {
+    const id = req.params.id;
+    let newImages = '';
 
     if (req.file) {
-      new_images = req.file.filename;
+      newImages = req.file.filename;
 
       try {
         await fs.unlinkSync('./uploads/' + req.body.old_images);
@@ -98,31 +99,72 @@ module.exports = {
         console.log(err);
       }
     } else {
-      new_images = req.body.old_images;
+      newImages = req.body.old_images;
     }
 
-    try {
-      const result = await Product.findByIdAndUpdate(id, {
-        name: req.body.name,
-        description: req.body.description,
-        category: req.body.category,
-        price: req.body.price,
-        stock: req.body.stock,
-        size: req.body.size,
-        color: req.body.color,
-        images: req.files.map(file => file.filename),
-      });
+    const existingProduct = await Product.findById(id).exec();
 
-      req.session.message = {
-        type: 'success',
-        message: 'Product updated successfully!',
-      };
-      console.log('product updated successfully');
-      res.redirect('/products');
-    } catch (err) {
-      res.json({ message: err.message, type: 'danger' });
+    let updatedImages = [...existingProduct.images];
+
+    console.log('req.body.deletedImages:', req.body.deletedImages);
+
+    if (req.body.deletedImages) {
+      try {
+        const product = await Product.findById(id);
+
+        if (product && Array.isArray(product.images)) {
+          // Create a new array excluding the deleted images
+          const deletedImages = req.body.deletedImages.split(',').map(image => image.trim());
+          updatedImages = product.images.filter(image => !deletedImages.includes(image));
+
+          // Update the product document with the new images array
+          product.images = updatedImages;
+
+          // Save the updated product document
+          await product.save();
+
+          // Log the removed images
+          deletedImages.forEach(deletedImage => {
+            console.log(updatedImages.includes(deletedImage)
+              ? 'Image Removed from Database:' : 'Image Not Found in Database:', deletedImage);
+          });
+        }
+      } catch (err) {
+        console.log(err);
+      }
     }
-  },
+
+    console.log('Updated Images:', updatedImages);
+
+    // Combine existing images with new ones
+    updatedImages = [...updatedImages, ...req.files.map(file => file.filename)];
+
+    const updatedProduct = {
+      name: req.body.name,
+      description: req.body.description,
+      category: req.body.category,
+      price: req.body.price,
+      stock: req.body.stock,
+      size: req.body.size,
+      color: req.body.color,
+      images: updatedImages,
+    };
+
+    const result = await Product.findByIdAndUpdate(id, updatedProduct);
+
+    req.session.message = {
+      type: 'success',
+      message: 'Product updated successfully!',
+    };
+
+    console.log('Product updated successfully');
+    res.redirect('/products');
+  } catch (err) {
+    console.error(err);
+    res.json({ message: err.message, type: 'danger' });
+  }
+},
+
 
   //to display products categorywise on user side
   getproductsCategorywise: async (req, res) => {

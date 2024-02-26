@@ -87,8 +87,11 @@ module.exports = {
       const otpRecord = await OTP.findOne({ email: a })
       console.log(otpRecord)
 
-      if (!otpRecord) {
-        return res.json({ message: 'Invalid or expired OTP', type: 'danger' });
+      if (!otpRecord || myotp !== otpRecord.otp) {
+        req.session.message = {
+          type: 'danger',
+          message: 'Invalid or expired OTP',
+        }
       }
 
 
@@ -114,8 +117,8 @@ module.exports = {
 
       }
     } catch (error) {
-      console.error(error);
-      res.json({ message: error.message, type: 'danger' });
+      console.error(error)
+      res.json({ message: error.message, type: 'danger' })
     }
   },
 

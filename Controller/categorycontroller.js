@@ -13,13 +13,16 @@ module.exports = {
     try {
       const { name } = req.body;
   
-      // Check if the category name already exists
-      const existingCategory = await Category.findOne({ name });
+      const existingCategory = await Category.findOne({
+        $or: [
+          { name: name },
+          { name: { $regex: new RegExp(`^${name}$`, 'i') } }
+        ]
+      });
   
       if (existingCategory) {
-        return res.status(400).json({ message: 'Category with this name already exists', type: 'danger' });
+        return res.render('adminviews/addcategory',{error:'category already exists',title: 'Add Category'})
       }
-  
 
       const category = new Category({
         name

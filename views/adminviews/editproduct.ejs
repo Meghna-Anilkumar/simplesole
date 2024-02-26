@@ -37,11 +37,10 @@
 
   <body>
     <div class="content">
-      <form action="/updateProduct/<%=product._id %>" method="post" class="form-horizontal"
+      <form id="yourFormId" action="/updateProduct/<%=product._id %>" method="post" class="form-horizontal"
         enctype="multipart/form-data">
         <h2 style="color: blue;">Edit Product(<%=product.name %>)</h2>
 
-        <!-- Text input-->
         <div class="form-group">
           <label class="col-md-4 control-label" for="product_name">NAME</label>
           <div class="col-md-8">
@@ -50,7 +49,6 @@
           </div>
         </div>
 
-        <!-- Text input-->
         <div class="form-group">
           <label class="col-md-4 control-label" for="product_name_fr">DESCRIPTION</label>
           <div class="col-md-8">
@@ -84,7 +82,6 @@
           </div>
         </div>
 
-        <!-- Size and Color in one line -->
         <div class="form-group">
           <label class="col-md-4 control-label" for="size">SIZE</label>
           <div class="col-md-4">
@@ -115,10 +112,12 @@
             <% }); %>
         </div>
 
+        <input type="hidden" name="deletedImages" id="deletedImages" value="">
+
         <div class="form-group">
           <label class="col-md-4 control-label" for="singlebutton"></label>
           <div class="col-md-4">
-            <button id="singlebutton" name="singlebutton" class="btn btn-primary">Update</button>
+            <button type="submit" id="singlebutton" name="singlebutton" class="btn btn-primary">Update</button>
           </div>
         </div>
 
@@ -127,43 +126,53 @@
     </div>
     
     <script>
+  
+      function removeImage(imageName) {
+        var deletedImagesInput = document.getElementById('deletedImages');
+        var currentDeletedImages = deletedImagesInput.value.split(',');
+        currentDeletedImages.push(imageName);
+        deletedImagesInput.value = currentDeletedImages.join(',');
+    
+      }
+    
       function previewImages(input) {
         var previewContainer = document.getElementById('imagePreview');
-        previewContainer.innerHTML = '';
-
         var files = input.files;
-
+    
         for (var i = 0; i < files.length; i++) {
           var file = files[i];
           var reader = new FileReader();
-
-            reader.onload = function (e) {
-            var previewDiv = document.createElement('div');
-            previewDiv.className = 'preview-container';
-
-            var img = document.createElement('img');
-            img.src = e.target.result;
-            img.style.width = '100px';
-            img.style.height = '100px';
-
-            var deleteButton = document.createElement('button');
-            deleteButton.className = 'delete-button';
-            deleteButton.innerHTML = 'X';
-            deleteButton.onclick = function () {
-            previewContainer.removeChild(previewDiv);
+    
+          reader.onload = (function (file) {
+            return function (e) {
+              var previewDiv = document.createElement('div');
+              previewDiv.className = 'preview-container';
+    
+              var img = document.createElement('img');
+              img.src = e.target.result;
+              img.style.width = '100px';
+              img.style.height = '100px';
+    
+              var deleteButton = document.createElement('button');
+              deleteButton.className = 'delete-button';
+              deleteButton.innerHTML = 'X';
+              deleteButton.onclick = function () {
+                previewContainer.removeChild(previewDiv);
+                removeImage(file.name); 
+              };
+    
+              previewDiv.appendChild(img);
+              previewDiv.appendChild(deleteButton);
+              previewContainer.appendChild(previewDiv);
             };
-
-            previewDiv.appendChild(img);
-            previewDiv.appendChild(deleteButton);
-            previewContainer.appendChild(previewDiv);
-          };
-
+          })(file);
+    
           reader.readAsDataURL(file);
         }
       }
     </script>
 
-    <script>
+ <script>
       document.getElementById('singlebutton').addEventListener('click', function (event) {
         var nameInput = document.getElementById('product_name');
         if (!validateName(nameInput.value)) {

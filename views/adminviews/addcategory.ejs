@@ -5,15 +5,13 @@
     <form action="/addCategory" method="post" onsubmit="return validateCategory()">
       <div class="mb-3">
         
-        <% if (message) { %>
-          <div class="alert alert-dismissable fade show alert-<%= message.type %>" role="alert">
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></button>
-            <strong>
-              <%= message.message %>
-            </strong>
+        <% if (typeof error !== 'undefined') { %>
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <%= error %>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
           </div>
         <% } %>
-
+        
         <label for="category" class="form-label">Category name:</label>
         <input type="text" class="form-control" id="name" name="name" required>
         <div id="categoryError" class="text-danger"></div>
