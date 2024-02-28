@@ -66,15 +66,21 @@
               <%= order.totalAmount %>
             </td>
             <td>
-              <select name="orderStatus" id="orderStatus_<%= order._id %>"
-                onchange="updateOrderStatus('<%= order._id %>')">
-                <option value="PENDING" <%=order.orderStatus==='PENDING' ? 'selected' : '' %>>Pending</option>
-                <option value="PROCESSING" <%=order.orderStatus==='PROCESSING' ? 'selected' : '' %>>Processing</option>
-                <option value="SHIPPED" <%=order.orderStatus==='SHIPPED' ? 'selected' : '' %>>Shipped</option>
-                <option value="DELIVERED" <%=order.orderStatus==='DELIVERED' ? 'selected' : '' %>>Delivered</option>
-                <option value="CANCELLED" <%=order.orderStatus==='CANCELLED' ? 'selected' : '' %>>Cancelled</option>
-              </select>
+              <% if (order.orderStatus === 'CANCELLED') { %>
+                <span style="color: red;">Order Cancelled</span>
+              <% } else if (order.orderStatus === 'DELIVERED') { %>
+                <span style="color: green;">Delivered</span>
+              <% } else { %>
+                <select name="orderStatus" id="orderStatus_<%= order._id %>"
+                  onchange="updateOrderStatus('<%= order._id %>')" <%= order.orderStatus === 'CANCELLED' || order.orderStatus === 'DELIVERED' ? 'disabled' : '' %>>
+                  <option value="PENDING" <%= order.orderStatus === 'PENDING' ? 'selected' : '' %>>Pending</option>
+                  <option value="PROCESSING" <%= order.orderStatus === 'PROCESSING' ? 'selected' : '' %>>Processing</option>
+                  <option value="SHIPPED" <%= order.orderStatus === 'SHIPPED' ? 'selected' : '' %>>Shipped</option>
+                  <option value="DELIVERED" <%= order.orderStatus === 'DELIVERED' ? 'selected' : '' %>>Delivered</option>
+                </select>
+              <% } %>
             </td>
+            
             <td><a href="/ordersview/<%= order._id %>">View</a></td>
           </tr>
           <% }); %>
@@ -103,5 +109,6 @@
           console.log('Order status updated:', updatedOrder);
         })
         .catch(error => console.error('Error updating order status:', error));
+        window.location.reload();
     }
   </script>

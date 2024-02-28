@@ -4,9 +4,13 @@
         <h1 class="display-4">OTP Verification</h1>
         <p class="lead">An OTP has been sent to <%= email %>. Please enter the OTP to complete the signup process.</p>
         
-       
-        
         <form action="/verify-otp" method="post">
+            <% if (typeof error !== 'undefined') { %>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                  <%= error %>
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+              <% } %>
         <div class="mb-3">
             <label for="otp" class="form-label"></label>
             <input type="hidden" class="form-control" id="otp" name="otp" value="<%= email %>" required>

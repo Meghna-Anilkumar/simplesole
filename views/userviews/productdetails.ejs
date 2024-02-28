@@ -265,13 +265,19 @@ img {
                       <% if (product.stock < 1) { %>disabled<% } %> 
                       required
                       pattern="[1-9]\d*" 
-                      oninput="validity.valid||(value='');"
+                      oninput="validity.valid||(value='1');"
                   >
               </h5>
                 <% if (product.stock >= 1) { %>
                     <div class="action">
                         <button class="add-to-cart btn btn-primary" type="button">add to cart</button>
                         <button class="like btn btn-danger" type="button"><span class="fa fa-heart"></span></button>
+                        <% if (typeof error !== 'undefined') { %>
+                          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <%= error %>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                        <% } %> 
                     </div>
                 <% } else { %>
                     <div class="action" style="pointer-events: none; opacity: 0.5;">
@@ -284,11 +290,13 @@ img {
       </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const addToCartButton = document.querySelector('.add-to-cart')
+    const addToCartButton = document.querySelector('.add-to-cart');
     
     addToCartButton.addEventListener('click', function () {
       const productId = '<%= product._id %>';
@@ -304,13 +312,31 @@ img {
           quantity,
         }),
       })
-        .then(response => response.json())
+        .then(response => {
+          if (response.redirected) {
+            window.location.href = response.url;
+            return null; 
+          }
+          return response.json();
+        })
         .then(data => {
-          console.log(data); 
+          if (data) {
+            console.log(data);
+
+            // Display SweetAlert for successful product addition
+            Swal.fire({
+              title: 'Success',
+              text: 'Product successfully added to the cart.',
+              icon: 'success',
+            });
+          }
         })
         .catch(error => {
           console.error('Error:', error);
-          
+
+          Swal.fire({
+            text: 'Product already exists in the cart',
+          });
         });
     });
   });

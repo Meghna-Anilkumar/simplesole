@@ -60,7 +60,8 @@ module.exports = {
       const existingItem = cart.items.find(item => item.product.equals(productId));
 
       if (existingItem) {
-        existingItem.quantity += parseInt(quantity);
+        const categories = await Category.find();
+        return res.render('userviews/productdetails',{error:'Item already in the cart',title:'Product details',category: categories});
       } else {
         cart.items.push({ product: productId, quantity: parseInt(quantity) });
       }

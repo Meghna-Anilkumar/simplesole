@@ -66,17 +66,19 @@
       <div class="product-info-box">
         <h2>Products</h2>
         <% order.items.forEach((item) => { %>
-          <div class="row">
-            <div class="col-md-2">
-              <img src="/<%= item.product.images[0] %>" class="img-fluid" alt="Product Image">
+          <% if (item.itemstatus !== 'CANCELLED') { %>
+            <div class="row">
+              <div class="col-md-2">
+                <img src="/<%= item.product.images[0] %>" class="img-fluid" alt="Product Image">
+              </div>
+              <div class="col-md-4">
+                <p>Product Name: <%= item.product.name %></p>
+                <p>Price: &#8377;<%= item.product.price %></p>
+                <p>Quantity: <%= item.quantity %></p>
+              </div>
             </div>
-            <div class="col-md-4">
-              <p>Product Name: <%= item.product.name %></p>
-              <p>Price: &#8377;<%= item.product.price %></p>
-              <p>Quantity: <%= item.quantity %></p>
-            </div>
-          </div>
-          <hr>
+            <hr>
+          <% } %>
         <% }); %>
       </div>
 

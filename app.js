@@ -37,10 +37,11 @@ app.use(session({
     resave: false,
     store: store,
     cookie: {
-        // maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week (adjust as needed)
-        secure: false, // set to true if using https
+        // maxAge: 1000 * 60 * 60 * 24 * 7, // 
+        secure: false,
     }
 }))
+
 
 //route for logout
 app.get('/logout', (req, res) => {

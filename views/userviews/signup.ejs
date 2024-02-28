@@ -35,12 +35,18 @@
                   </div>
                   <input class="form-control" id="password" name="password" placeholder="Enter password" type="password" required="true">
                 </div>
+                <% if (typeof error !== 'undefined') { %>
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <%= error %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                  </div>
+                <% } %> 
                 <br>
                 <div class="form-group input-group">
                   <div class="input-group-prepend">
                     <span class="input-group-text"> <i class="fa fa-lock"></i> </span>
                   </div>
-                  <input class="form-control" name="confirm" placeholder="Confirm password" type="password" required="true">
+                  <input class="form-control" name="confirmPassword" placeholder="Confirm password" type="password" required="true">
                 </div>
                 <br>
                 <div class="form-group">

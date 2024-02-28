@@ -28,7 +28,7 @@ router.post('/editprofiledetails', usercontroller.editprofiledetails)
 router.get('/category/:categoryId', productcontroller.getproductsCategorywise)
 router.get('/products/:id', productcontroller.getproductdetails)
 router.get('/seeallproducts', productcontroller.getAllProducts)
-
+// router.get('/search', productcontroller.getAllProducts)
 
 //address
 router.get('/address', usercontroller.getaddressbook)
@@ -56,6 +56,9 @@ router.post('/placeOrder', isAuth.checkAuth, ordercontroller.placeorder)
 //my orders
 router.get('/orders', isAuth.checkAuth, ordercontroller.myorders)
 router.get('/orderdetails/:orderId', isAuth.checkAuth, ordercontroller.orderdetails)
+router.post('/confirmCancellation/:orderId',ordercontroller.confirmcancellation)
+router.post('/confirmItemCancellation/:orderId/:index', ordercontroller.confirmItemCancellation)
+
 
 
 module.exports = router

@@ -62,14 +62,13 @@
         <!-- Sidebar -->
         <div class="col-md-3 sidebar" style="margin-top: 90px;">
             <div class="d-flex flex-column align-items-center text-center p-3 py-5">
-                <!-- <img class="rounded-circle mt-5" width="150px"
-                    src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg"> -->
                     <span class="font-weight-bold"><%= data ? (data.firstName || '') : '' %> <%= data ? (data.lastName || '') : '' %></span>
                     <span class="font-weight-bold">Phone:
                         <%= data ? (data.mobileNumber || '') : '' %>
                     </span>
 
-                <span class="text-black-50"><%= user.email %></span><span> <a href="/logout">Logout</a> </span>
+                <span class="text-black-50"><%= user.email %></span>
+                <span> <a href="/logout" onclick="confirmLogout()">Logout</a> </span>
             </div>
             <!-- Sidebar Links -->
             <div class="text-center">
@@ -112,8 +111,8 @@
             </div>
     </div>
 </div>
-
 </div>
+
 <script>
     document.getElementById('editProfileForm').addEventListener('submit', async function (event) {
     event.preventDefault();

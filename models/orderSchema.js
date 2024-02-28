@@ -11,16 +11,28 @@ const orderSchema = new mongoose.Schema({
             product: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Product',
-                // required: true
+               
             },
             quantity: {
                 type: Number,
-                // required: true
+                
             },
             price: {
                 type: Number,
-                // required: true
-            }
+            }, 
+
+            itemstatus: {
+                type: String,
+                enum: ['PENDING', 'CANCELLED'],
+                default: 'PENDING'
+              },
+
+              cancellationReason: {
+                type: String,
+                required: function () {
+                    return this.itemStatus === 'CANCELLED'
+                }   
+              }
         }
     ],
     shippingAddress: {
@@ -30,7 +42,7 @@ const orderSchema = new mongoose.Schema({
     },
     totalAmount: {
         type: Number,
-        // required: true
+        
     },
     paymentMethod: {
         type: String,
@@ -48,9 +60,14 @@ const orderSchema = new mongoose.Schema({
     },
     deliveryDate: {
         type: Date
+    },
+    cancellationReason: {
+        type: String,
+        required: function () {
+            return this.orderStatus === 'CANCELLED'
+        }   
     }
-
-});
+})
 
 const Order = mongoose.model('Order', orderSchema);
 

@@ -11,22 +11,61 @@ module.exports = {
   register: async (req, res) => {
     try {
       const { name, email, password, confirmPassword } = req.body;
-      console.log(email);
+
+      const nameRegex = /^[A-Za-z]+$/;
+
+    if (!nameRegex.test(name)) {
+      const categories = await Category.find();
+      return res.render('userviews/signup', {
+        error: 'Please enter a valid name!!!!!',
+        title: 'Signup',
+        category: categories,
+      });
+    }
+
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      const categories = await Category.find();
+      return res.render('userviews/signup',{error:'Password should contain atleast 8 characters,an uppercase letter,a lowercase letter and a special character',title:'Signup',category: categories});
+    }
+
+    if (password !== confirmPassword) {
+      const categories = await Category.find();
+      return res.render('userviews/signup', {
+        error: 'Password and Confirm Password do not match',
+        title: 'Signup',
+        category: categories
+      });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      const categories = await Category.find();
+      return res.render('userviews/signup', {
+        error: 'Email already exists. Please use a different email address.',
+        title: 'Signup',
+        category: categories,
+      })
+    }
+
+      console.log(email)
       const user = {
         name,
         email,
         password,
         confirmPassword,
-      };
+      }
 
-      const otp = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false });
+      const otp = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
 
       const otpRecord = new OTP({
         name: req.body.name,
         email: req.body.email,
         otp: otp,
         password: req.body.password,
-        confirmPassword: req.body.confirm,
+        confirmPassword: req.body.confirmPassword,
         expiresAt: Date.now(),
         blocked: false,
       });
@@ -88,12 +127,9 @@ module.exports = {
       console.log(otpRecord)
 
       if (!otpRecord || myotp !== otpRecord.otp) {
-        req.session.message = {
-          type: 'danger',
-          message: 'Invalid or expired OTP',
-        }
+       const categories = await Category.find();
+       return res.render('userviews/otp',{error:'Invalid otp',category: categories,email})
       }
-
 
       console.log(myotp)
       console.log(otpRecord.otp)

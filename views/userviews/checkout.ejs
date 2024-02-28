@@ -500,7 +500,8 @@
   </div>
   <!-- </section> -->
 
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10">
+  </script>
   <script>
     document.getElementById('openAddressModal').addEventListener('click', function () {
       $('#addressModal').modal('show');
@@ -559,6 +560,31 @@
     window.onload = fetchAddresses;
   </script>
 
+<script>
+  document.getElementById('placeorderButton').addEventListener('click', function (event) {
+    event.preventDefault();
+
+    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+    const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+
+    if (!selectedAddress) {
+      Swal.fire({
+        text: 'Please select a shipping address.',
+        icon: 'error',
+      });
+      return;
+    }
+
+    if (!selectedPaymentMethod) {
+      Swal.fire({
+        text: 'Please select a payment method.',
+        icon: 'error',
+      });
+      return;
+    }
+    document.getElementById('placeorderButton').closest('form').submit();
+  });
+</script>
 
   </div>
   <%- include('./footer') %>

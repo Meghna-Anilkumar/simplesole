@@ -5,6 +5,19 @@
   align-items: center;
 }
 
+.css-huh2rh {
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 2px;
+      background-color: rgb(255, 255, 255) !important;
+      color: rgb(255, 63, 108);
+      border-color: rgb(255, 63, 108);
+      border-width: 1px;
+      border-style: solid;
+      cursor: pointer;
+    }
+
 #searchInput {
   padding: 8px;
   border: 1px solid #ccc;
@@ -16,8 +29,13 @@
 #applySort {
   padding: 8px;
 }
+
 </style>
 <br><br><br><br>
+<form action="/search" method="GET" class="search-form">
+  <input type="text" name="query" placeholder="Search for products" style="margin-top: 20px; margin-left: 75px;">
+  <button type="submit" class="css-huh2rh">Search</button>
+</form>
 <form action="/seeallproducts" method="GET" id="sortForm">
 <div class="container">
     <div class="row">
@@ -28,7 +46,7 @@
               <option value="priceLowToHigh">Price: Low to High</option>
               <option value="priceHighToLow">Price: High to Low</option>
             </select>
-            <button id="applySort" class="btn btn-primary">Apply</button>
+            <button id="applySort" class="css-huh2rh">Apply</button>
           </div>
         </div>
       </div>

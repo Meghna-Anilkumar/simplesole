@@ -47,11 +47,8 @@ module.exports = {
       const user = await User.findOne({ email: email });
   
       if (!user || user.blocked) {
-        req.session.message = {
-          type: 'danger',
-          message: 'Invalid user ID or password',
-        };
-        return res.redirect('/login');
+        const categories = await Category.find();
+        return res.render('userviews/login',{error:'User does not exist',title:'Login',category: categories});
       }
   
       const isMatch = await bcrypt.compare(password, user.password);
@@ -62,13 +59,10 @@ module.exports = {
         console.log('Redirecting to /');
         return res.redirect('/');
       } else {
-        req.session.message = {
-          type: 'danger',
-          message: 'Invalid credentials',
+        const categories = await Category.find();
+        return res.render('userviews/login',{error:'Incorrect password',title:'Login',category: categories});
         };
-        console.log('Incorrect password');
-        return res.redirect('/login');
-      }
+      
     } catch (error) {
       console.error(error);
       res.json({ message: error.message, type: 'danger' });
