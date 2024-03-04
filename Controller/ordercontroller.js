@@ -4,11 +4,22 @@ const isAuth = require('../middlewares/isAuth')
 const Product = require('../models/product')
 const Address = require('../models/address')
 const Order = require('../models/orderSchema')
+const Razorpay= require('razorpay')
+require('dotenv').config()
+
+//Razorpay instance
+const instance = new Razorpay({
+  key_id: process.env.key_id,
+  key_secret: process.env.key_secret,
+});
+
 
 module.exports = {
 
   placeorder: async (req, res) => {
     try {
+
+      console.log('Received data:', req.body);
       const user = req.session.user
       const { paymentMethod } = req.body;
       const cart = await Cart.findOne({ user }).populate('items.product').exec();
@@ -28,7 +39,7 @@ module.exports = {
           product.stock -= item.quantity;
           await product.save();
         }
-      }));
+      }))
 
       await newOrder.save();
 

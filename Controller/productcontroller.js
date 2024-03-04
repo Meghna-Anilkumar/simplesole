@@ -113,17 +113,13 @@ updateproduct: async (req, res) => {
         const product = await Product.findById(id);
 
         if (product && Array.isArray(product.images)) {
-          // Create a new array excluding the deleted images
           const deletedImages = req.body.deletedImages.split(',').map(image => image.trim());
           updatedImages = product.images.filter(image => !deletedImages.includes(image));
 
-          // Update the product document with the new images array
           product.images = updatedImages;
 
-          // Save the updated product document
           await product.save();
 
-          // Log the removed images
           deletedImages.forEach(deletedImage => {
             console.log(updatedImages.includes(deletedImage)
               ? 'Image Removed from Database:' : 'Image Not Found in Database:', deletedImage);
@@ -136,7 +132,6 @@ updateproduct: async (req, res) => {
 
     console.log('Updated Images:', updatedImages);
 
-    // Combine existing images with new ones
     updatedImages = [...updatedImages, ...req.files.map(file => file.filename)];
 
     const updatedProduct = {
@@ -248,6 +243,29 @@ updateproduct: async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 },
+
+//search products
+searchproducts:async(req,res)=>{
+  try{
+  const searchQuery = req.query.query;
+
+  const allProducts = await Product.find();
+  const category = await Category.find().exec();
+
+    const searchResults = await Product.find({ name: { $regex: new RegExp(searchQuery, 'i') } });
+
+    res.render('userviews/allproducts', {
+      title: 'Search Results',
+      allProducts: allProducts,
+      searchResults: searchResults,
+      category:category
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+}
+
 
 };
 
