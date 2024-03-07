@@ -560,35 +560,87 @@
     window.onload = fetchAddresses;
   </script>
 
-<script>
-  document.getElementById('placeorderButton').addEventListener('click', function (event) {
-    event.preventDefault();
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script>
+    document.getElementById('placeorderButton').addEventListener('click', async function (event) {
+      event.preventDefault();
 
-    const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
-    const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+      const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+      const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
 
-    if (!selectedAddress) {
-      Swal.fire({
-        text: 'Please select a shipping address.',
-        icon: 'error',
-      });
-      return;
-    }
+      if (!selectedAddress) {
+        Swal.fire({
+          text: 'Please select a shipping address.',
+          icon: 'error',
+        })
+        return;
+      }
 
-    if (!selectedPaymentMethod) {
-      Swal.fire({
-        text: 'Please select a payment method.',
-        icon: 'error',
-      });
-      return;
-    }
-    document.getElementById('placeorderButton').closest('form').submit();
-  });
-</script>
+      if (!selectedPaymentMethod) {
+        Swal.fire({
+          text: 'Please select a payment method.',
+          icon: 'error',
+        });
+        return;
+      }
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-
-
+      if (selectedPaymentMethod.value === 'RAZORPAY') {
+        var options = {
+          key: "rzp_test_RXM5ojGKCHke94",
+          amount: "<%= cart.total * 100 %>",
+          currency: "INR",
+          name: "Simple Sole",
+          description: "Test Transaction",
+          image: "https://example.com/your_logo",
+          order_id: "<%= order.id %>",
+          handler: function (response) {
+            fetch("/process-payment", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                payment_id: response.razorpay_payment_id,
+                order_id: "order_IluGWxBm9U8zJ8",
+                signature: response.razorpay_signature,
+                paymentMethod: selectedPaymentMethod.value,
+                selectedAddress: selectedAddress.value,
+              }),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                console.log("Payment details sent to the server:", data);
+                if (data.success) {
+                  window.location.href = "/confirm";
+                }
+              })
+              .catch((error) => {
+                console.error("Error sending payment details to the server:", error);
+              });
+            return this;
+          },
+          notes: {
+            address: "Razorpay Corporate Office",
+          },
+          theme: {
+            color: "#3399cc",
+          },
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.on("payment.failed", function (response) {
+          alert(response.error.code);
+          alert(response.error.description);
+          alert(response.error.source);
+          alert(response.error.step);
+          alert(response.error.reason);
+          alert(response.error.metadata.order_id);
+          alert(response.error.metadata.payment_id);
+        });
+        rzp1.open();
+      }
+      document.getElementById('placeorderButton').closest('form').submit();
+    });
+  </script>
 
   </div>
   <%- include('./footer') %>

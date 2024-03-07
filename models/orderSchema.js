@@ -66,7 +66,8 @@ const orderSchema = new mongoose.Schema({
         required: function () {
             return this.orderStatus === 'CANCELLED'
         }   
-    }
+    },
+
 })
 
 const Order = mongoose.model('Order', orderSchema);

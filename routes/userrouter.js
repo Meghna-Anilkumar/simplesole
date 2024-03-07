@@ -52,6 +52,7 @@ router.get('/proceedtocheckout', isAuth.checkAuth, checkoutcontroller.checkoutpa
 
 //place order
 router.post('/placeOrder', isAuth.checkAuth, ordercontroller.placeorder)
+router.post('/process-payment', isAuth.checkAuth, ordercontroller.processPayment);
 
 //my orders
 router.get('/orders', isAuth.checkAuth, ordercontroller.myorders)
