@@ -30,7 +30,7 @@
   </style>
   <div id="content">
     <h1>Orders</h1>
-
+  
     <table>
       <thead>
         <tr>
@@ -45,34 +45,25 @@
         </tr>
       </thead>
       <tbody>
-        <% orders.forEach((order, index)=> { %>
+        <% orders.forEach((order, index) => { %>
           <tr>
-            <td>
-              <%= index + 1 %>
-            </td>
-            <td>
-              <%= order._id %>
-            </td>
-            <td>
-              <%= order.user._id%>
-            </td>
-            <td>
-              <%= order.orderdate.toDateString() %>
-            </td>
-            <td>
-              <%= order.paymentMethod %>
-            </td>
-            <td>
-              <%= order.totalAmount %>
-            </td>
+            <td><%= index + 1 %></td>
+            <td><%= order._id %></td>
+            <td><%= order.user._id %></td>
+            <td><%= order.orderdate.toDateString() %></td>
+            <td><%= order.paymentMethod %></td>
+            <td><%= order.totalAmount %></td>
             <td>
               <% if (order.orderStatus === 'CANCELLED') { %>
                 <span style="color: red;">Order Cancelled</span>
               <% } else if (order.orderStatus === 'DELIVERED') { %>
                 <span style="color: green;">Delivered</span>
+              <% } else if (order.orderStatus === 'RETURNED') { %>
+                <span style="color: red;">Returned</span>
               <% } else { %>
                 <select name="orderStatus" id="orderStatus_<%= order._id %>"
-                  onchange="updateOrderStatus('<%= order._id %>')" <%= order.orderStatus === 'CANCELLED' || order.orderStatus === 'DELIVERED' ? 'disabled' : '' %>>
+                  onchange="updateOrderStatus('<%= order._id %>')"
+                  <%= order.orderStatus === 'CANCELLED' || order.orderStatus === 'DELIVERED' || order.orderStatus === 'RETURNED' ? 'disabled' : '' %>>
                   <option value="PENDING" <%= order.orderStatus === 'PENDING' ? 'selected' : '' %>>Pending</option>
                   <option value="PROCESSING" <%= order.orderStatus === 'PROCESSING' ? 'selected' : '' %>>Processing</option>
                   <option value="SHIPPED" <%= order.orderStatus === 'SHIPPED' ? 'selected' : '' %>>Shipped</option>
@@ -80,18 +71,17 @@
                 </select>
               <% } %>
             </td>
-            
             <td><a href="/ordersview/<%= order._id %>">View</a></td>
           </tr>
-          <% }); %>
+        <% }); %>
       </tbody>
     </table>
   </div>
-
+  
   <script>
     function updateOrderStatus(orderId) {
       const newOrderStatus = document.getElementById(`orderStatus_${orderId}`).value;
-
+  
       fetch(`/updateOrderStatus/${orderId}`, {
         method: 'POST',
         headers: {
@@ -109,6 +99,8 @@
           console.log('Order status updated:', updatedOrder);
         })
         .catch(error => console.error('Error updating order status:', error));
-        window.location.reload();
+      
+      window.location.reload();
     }
   </script>
+  

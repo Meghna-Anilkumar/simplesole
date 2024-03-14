@@ -14,6 +14,9 @@ const categorycontroller = require('../Controller/categorycontroller');
 const isAuth = require('../middlewares/isAuth')
 const adminAuth = require('../middlewares/adminAuth')
 const adminordercontroller = require('../Controller/adminordercontroller')
+const couponcontroller=require('../Controller/couponcontroller')
+
+
 
 router.get('/adminlogin', adminAuth.isadminlogged, admincontroller.toadminlogin)
 router.post('/signup', customercontroller.register)
@@ -43,6 +46,12 @@ router.get('/adminlogout',admincontroller.adminlogout)
 router.get('/adminorders', adminordercontroller.orderspage)
 router.get('/ordersview/:id', adminordercontroller.adminvieworder)
 router.post('/updateOrderStatus/:orderId', adminordercontroller.updateorderstatus)
+
+//coupons
+router.get('/coupons', couponcontroller.couponpage)
+
+
+
 
 
 

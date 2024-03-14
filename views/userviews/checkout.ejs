@@ -432,6 +432,8 @@
       </div>
 
       <p>SHIPPING</p>
+      <p>APPLY COUPON</p>
+                <input id="code" placeholder="Enter coupon code">
 
       <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
         <div class="col">TOTAL PRICE</div>
@@ -453,7 +455,7 @@
     <%- include('./addaddress') %>
 
   </div>
-
+<br>
   <div class="container">
     <!-- <div class="actions"> -->
     <form action="/placeOrder" method="post">
@@ -486,9 +488,10 @@
           </div>
           <div class="payment__type payment__type--paypal">
             <input type="radio" name="paymentMethod" id="paymentRazorpay" value="RAZORPAY">
-            <label for="paymentRazorpay"><i class="icon icon-wallet"></i>ONLINE PAYMENT</label>
+            <label for="paymentRazorpay"><i class="icon icon-wallet"></i>RAZORPAY</label>
           </div>
         </div>
+        <br>
 
         <button type="submit" class="button-base-button" id="placeorderButton">Place your Order
           <i class="icon icon-arrow-right-circle"></i>
@@ -560,7 +563,7 @@
     window.onload = fetchAddresses;
   </script>
 
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
   <script>
     document.getElementById('placeorderButton').addEventListener('click', async function (event) {
       event.preventDefault();
@@ -611,7 +614,7 @@
               .then((data) => {
                 console.log("Payment details sent to the server:", data);
                 if (data.success) {
-                  window.location.href = "/confirm";
+                  window.location.href = "userviews/successpage";
                 }
               })
               .catch((error) => {
@@ -635,12 +638,14 @@
           alert(response.error.reason);
           alert(response.error.metadata.order_id);
           alert(response.error.metadata.payment_id);
-        });
-        rzp1.open();
+        })
+        rzp1.open()
       }
-      document.getElementById('placeorderButton').closest('form').submit();
-    });
+  document.getElementById('placeorderButton').closest('form').submit()
+});
+    
   </script>
+   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
   </div>
   <%- include('./footer') %>

@@ -193,16 +193,15 @@ a:hover{
             </div>
         </div>
         <div class="col-md-4 summary">
-            <div><h5><b>Summary</b></h5></div>
+            <div><h5><b>Cart Summary</b></h5></div>
             <hr>
             <div class="row">
                 <div class="col" style="padding-left:0;">PRICE(<%= cart && cart.items ? cart.items.length : 0 %> ITEMS)</div>
                 <div id="totalPrice" class="col text-right">&#8377;<%= data.total %></div>
             </div>
             <form>
-                <p>SHIPPING</p>
-                <p>APPLY COUPON</p>
-                <input id="code" placeholder="Enter coupon code">
+                <!-- <p>SHIPPING</p> -->
+                
             </form>
             <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
                 <div class="col">TOTAL PRICE</div>

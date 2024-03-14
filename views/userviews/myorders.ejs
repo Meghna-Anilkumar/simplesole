@@ -86,20 +86,21 @@
                           <div class="col-md-4">
                             <p class="text-muted mb-0 small">Payment Method: <%= order.paymentMethod %>
                             </p>
-                            <p class="text-muted mb-0 small">Order Status: <%= order.orderStatus %>
-                            </p>
+                            <p class="text-muted mb-0 small" data-order-id="<%= order._id %>">Order Status: <%= order.orderStatus %></p>
+
                           </div>
                           <div class="col-md-8 text-right">
                             <a href="/orderdetails/<%= order._id %>" class="btn btn-primary">View Details</a>
 
                             <% if (order.orderStatus === 'DELIVERED') { %>
-                              <button class="css-ibwr57" onclick="returnOrder('<%= order._id %>')">Return Order</button>
+                              <button class="css-ibwr57" data-order-id="<%= order._id %>" data-action="return" onclick="openReturnOrderModal('<%= order._id %>')">Return</button>
+
+
                             <% } else if (order.orderStatus === 'CANCELLED') { %>
                               <button class="css-ibwr57" disabled>Cancelled</button>
-                            <% } else { %>
-                              <button id="cancelOrderBtn_<%= order._id %>" class="css-ibwr57"
-                                onclick="openCancelOrderModal('<%= order._id %>')">Cancel Order</button>
-                            <% } %>
+                              <% } else if (order.orderStatus !== 'RETURNED') { %>
+                                <button id="cancelOrderBtn_<%= order._id %>" class="css-ibwr57" onclick="openCancelOrderModal('<%= order._id %>')">Cancel Order</button>
+                              <% } %>
                           </div>
                         </div>
                     </div>
@@ -134,7 +135,7 @@
         </div>
       </div>
     </div>
-    <!-- //cancel item modal -->
+
     <div class="modal" tabindex="-1" role="dialog" id="cancelItemModal">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -153,6 +154,29 @@
               </div>
               <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
               <button type="submit" class="btn btn-danger" id="confirmCancelItemBtn">Confirm Cancellation</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="returnOrderModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Return Reason</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="returnOrderForm">
+              <input type="hidden" id="returnOrderId" name="returnOrderId" value="">
+              <div class="mb-3">
+                <label for="returnReason" class="form-label">Please provide a reason for return:</label>
+                <textarea class="form-control" id="returnReason" name="returnReason" rows="4" required></textarea>
+              </div>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-warning" id="confirmReturnBtn">Confirm Return</button>
             </form>
           </div>
         </div>
@@ -258,6 +282,65 @@
         var cancelItemModal = bootstrap.Modal.getInstance(document.getElementById('cancelItemModal'));
         cancelItemModal.hide();
         window.location.reload();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  }
+</script>
+
+
+<script>
+  function openReturnOrderModal(orderId) {
+    document.getElementById('returnOrderId').value = orderId;
+    var returnOrderModal = new bootstrap.Modal(document.getElementById('returnOrderModal'));
+    returnOrderModal.show();
+  }
+
+  document.getElementById('returnOrderForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+    var orderId = document.getElementById('returnOrderId').value;
+    var returnReason = document.getElementById('returnReason').value;
+    confirmReturn(orderId, returnReason);
+    var returnOrderModal = bootstrap.Modal.getInstance(document.getElementById('returnOrderModal'));
+    returnOrderModal.hide();
+
+    // Update the button text to "Returned"
+    var returnButton = document.querySelector(`button[data-order-id="${orderId}"]`);
+    if (returnButton) {
+      returnButton.innerText = 'Returned';
+      returnButton.disabled = true;
+    }
+  });
+
+  function confirmReturn(orderId, returnReason) {
+    fetch(`/confirmReturn/${orderId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ returnReason }),
+    })
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+
+        if (data.message === 'Order returned successfully') {
+          // Update the order status to "Returned"
+          var orderStatusElement = document.querySelector(`p[data-order-id="${orderId}"]`);
+          if (orderStatusElement) {
+            orderStatusElement.innerText = 'Order Status: Returned';
+          }
+
+          var returnButton = document.querySelector(`button[data-order-id="${orderId}"][data-action="return"]`);
+          if (returnButton) {
+            returnButton.innerText = 'Returned';
+            returnButton.disabled = true;
+          }
+          window.location.reload(); // Reloading the page after successful update
+        } else {
+          console.error('Failed to return order:', data.error);
+        }
       })
       .catch(error => {
         console.error('Error:', error);

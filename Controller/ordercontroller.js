@@ -5,6 +5,7 @@ const Product = require('../models/product')
 const Address = require('../models/address')
 const Order = require('../models/orderSchema')
 const Razorpay = require('razorpay')
+const Wallet = require('../models/wallet')
 const crypto = require('crypto')
 require('dotenv').config()
 
@@ -22,7 +23,7 @@ module.exports = {
       console.log('Received data:', req.body);
       const user = req.session.user;
       const cart = await Cart.findOne({ user }).populate('items.product').exec();
-  
+
       const newOrder = new Order({
         user: req.session.user,
         items: cart.items,
@@ -30,7 +31,7 @@ module.exports = {
         totalAmount: cart.total,
         paymentMethod,
       });
-  
+
       await Promise.all(
         cart.items.map(async (item) => {
           const product = await Product.findById(item.product._id);
@@ -40,70 +41,110 @@ module.exports = {
           }
         })
       );
-  
-      await newOrder.save();
-  
+
       if (paymentMethod === 'CASH_ON_DELIVERY') {
+
+        await newOrder.save();
         cart.items = [];
         cart.total = 0;
         await cart.save();
-  
-        return res.render('userviews/successpage'); 
+
+        return res.render('userviews/successpage');
       }
-      
+
+      else if (paymentMethod === 'WALLET') {
+        const userWallet = await Wallet.findOne({ user });
+        if (!userWallet || userWallet.balance < cart.total) {
+          return res.status(400).json({ error: 'Insufficient balance in the wallet' });
+        }
+
+        const newOrder = new Order({
+          user: req.session.user,
+          items: cart.items,
+          shippingAddress: req.body.selectedAddress,
+          totalAmount: cart.total,
+          paymentMethod,
+        });
+
+        await Promise.all(
+          cart.items.map(async (item) => {
+            const product = await Product.findById(item.product._id);
+            if (product) {
+              product.stock -= item.quantity;
+              await product.save();
+            }
+          })
+        );
+
+        userWallet.balance -= cart.total;
+        transactiontype = 'DEBIT'
+        await userWallet.save();
+
+        await newOrder.save();
+        cart.items = [];
+        cart.total = 0;
+        await cart.save();
+
+        return res.render('userviews/successpage');
+      }
+
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal server error' });
     }
   },
-  
+
 
   processPayment: async (req, res) => {
     try {
       const { paymentMethod } = req.body;
       const user = req.session.user;
       const cart = await Cart.findOne({ user }).populate('items.product').exec();
-  
+
       if (paymentMethod === 'RAZORPAY') {
         console.log('hiiiiiii');
         const amountInPaise = Math.round(cart.total * 100);
         const razorpayOptions = {
           amount: amountInPaise,
           currency: 'INR',
-          receipt:`order_rcpt_${Math.random().toString(36).substring(7)}`,
+          receipt: `order_rcpt_${Math.random().toString(36).substring(7)}`,
         };
         console.log('razorpay', razorpayOptions);
-  
+
         instance.orders.create(razorpayOptions, async function (err, razorpayOrder) {
           if (err) {
             console.error(err);
             return res.status(500).json({ error: 'Razorpay order creation failed' });
           }
           console.log('Razorpay order created successfully');
-  
+
           const newOrder = new Order({
             user: user,
             items: cart.items,
             totalAmount: cart.total,
             shippingAddress: req.body.selectedAddress,
             paymentMethod: 'RAZORPAY',
-            paymentStatus: 'paid', 
+            paymentStatus: 'paid',
             razorpayOrderId: razorpayOrder.id,
           });
           await newOrder.save();
-  
+
           await Cart.findOneAndDelete({ user: user });
-          return res.render('userviews/successpage', { order: newOrder });
+
+          return res.status(200).json({ success: true, order: newOrder });
         })
       } else {
-        
+
       }
     } catch (error) {
       console.error('Error processing payment:', error);
+
       res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   },
-  
+
+
+
   // get my orders page
   myorders: async (req, res) => {
     try {
@@ -165,6 +206,17 @@ module.exports = {
           }
         }));
 
+        // Check if payment method is online payment or wallet
+        if (order.paymentMethod === 'Online Payment' || order.paymentMethod === 'Wallet' || order.paymentMethod === 'RAZORPAY') {
+          // Add the cancelled amount to the user's wallet
+          const userWallet = await Wallet.findOne({ user: order.user });
+          if (userWallet) {
+            userWallet.balance += order.totalAmount;
+            transactiontype = 'CREDIT'
+            await userWallet.save();
+          }
+        }
+
         order.orderStatus = 'CANCELLED';
         order.cancellationReason = cancellationReason || '';
         await order.save();
@@ -179,8 +231,6 @@ module.exports = {
     }
   },
 
-
-  //item cancellation
   confirmItemCancellation: async (req, res) => {
     const { orderId, index } = req.params;
     const { itemCancellationReason } = req.body;
@@ -205,27 +255,28 @@ module.exports = {
 
         if (item.product && item.product.price) {
           const cancelledItemTotal = item.product.price * item.quantity;
-          order.totalAmount = (order.totalAmount || 0) - cancelledItemTotal;
+          order.totalAmount -= cancelledItemTotal;
+
+          if (order.paymentMethod === 'RAZORPAY' || order.paymentMethod === 'WALLET') {
+            const userWallet = await Wallet.findOne({ user: order.user });
+            if (userWallet) {
+              userWallet.balance += cancelledItemTotal;
+              transactiontype = 'CREDIT'
+              await userWallet.save();
+            }
+          }
         } else {
           return res.status(500).json({ error: 'Product price is undefined' });
         }
 
         await order.save();
 
-        console.log('Order after item cancellation:', order);
-
         const allItemsCancelled = order.items.every(item => item.itemstatus === 'CANCELLED');
-
-        console.log('All items cancelled:', allItemsCancelled);
 
         if (allItemsCancelled) {
           order.orderStatus = 'CANCELLED';
-
           order.cancellationReason = itemCancellationReason || '';
-
           await order.save();
-
-          console.log('Order status after updating:', order.orderStatus);
         }
 
         return res.json({ message: 'Item cancelled successfully' });
@@ -237,6 +288,87 @@ module.exports = {
       res.status(500).json({ error: 'Internal server error' });
     }
   },
+
+  //successpage
+  getsuccesspage: async (req, res) => {
+    res.render('userviews/successpage')
+  },
+
+  //get wallet page
+  getwalletpage: async (req, res) => {
+    try {
+      const user = req.session.user;
+      const wallet = await Wallet.findOne({ user });
+
+      if (!wallet) {
+        return res.status(404).send('Wallet not found');
+      }
+
+      const categories = await Category.find();
+      const walletBalance = wallet.balance;
+      const transactiontype = wallet.transactiontype;
+
+      return res.render('userviews/wallet', {
+        title: 'Wallet',
+        wallet,
+        category: categories,
+        user,
+        walletBalance,
+        transactiontype
+      });
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+      return res.status(500).send('Internal Server Error');
+    }
+  },
+
+
+  //return order
+  returnorder: async (req, res) => {
+    const { orderId } = req.params;
+    const { returnReason } = req.body;
+    console.log('Received return request for order:', orderId);
+    try {
+      console.log('Attempting to find order in the database');
+      const order = await Order.findById(orderId);
+
+      if (!order) {
+        console.log('Order not found');
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      if (order.orderStatus === 'DELIVERED') {
+
+        await Promise.all(order.items.map(async (item) => {
+          const product = await Product.findById(item.product._id);
+          if (product) {
+            product.returnedQuantity += item.quantity;
+            await product.save();
+          }
+        }));
+
+        const userWallet = await Wallet.findOne({ user: order.user });
+        if (userWallet) {
+          userWallet.balance -= order.totalAmount;
+          transactiontype = 'CREDIT'
+          await userWallet.save();
+        }
+
+        // Update order status and add return reason
+        order.orderStatus = 'RETURNED';
+        order.returnReason = returnReason || '';
+        await order.save();
+
+        return res.json({ message: 'Order returned successfully' });
+      } else {
+        return res.status(400).json({ error: 'Order cannot be returned because it is not delivered yet' });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  },
+
 
 
 }

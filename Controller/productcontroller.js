@@ -3,6 +3,7 @@ const Category = require('../models/category');
 const multer = require('multer')
 const fs = require('fs')
 const categorycontroller = require('../Controller/categorycontroller');
+const Wishlist=require('../models/wishlist')
 
 module.exports = {
 
@@ -181,17 +182,37 @@ updateproduct: async (req, res) => {
   //get product details
   getproductdetails: async (req, res) => {
     try {
-      const product = await Product.findById(req.params.id).populate({ path: 'category', select: 'name-_id' });
-
+      const productId = req.params.id;
+      const product = await Product.findById(productId).populate({ path: 'category', select: 'name-_id' });
+  
       if (!product) {
         return res.status(404).render('error', { message: 'Product not found' });
       }
-
+  
+      // Check if the user is authenticated and get the user's wishlist
+      const user = req.session.user;
+      let productInWishlist = false;
+  
+      if (user) {
+        const wishlist = await Wishlist.findOne({ user: user._id });
+        
+        if (wishlist) {
+          // Check if the product is in the wishlist
+          productInWishlist = wishlist.items.some(item => item.product.toString() === productId);
+        }
+      }
+  
       const products = await Product.find();
-
-      const selectedCategory = product.category
-
-      res.render('userviews/productdetails', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products, product: product});
+      const selectedCategory = product.category;
+  
+      res.render('userviews/productdetails', {
+        title: 'Products in category',
+        category: selectedCategory,
+        selectedCategory: selectedCategory,
+        products: products,
+        product: product,
+        productInWishlist: productInWishlist, // Pass the information to the template
+      });
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
@@ -259,7 +280,7 @@ searchproducts:async(req,res)=>{
       allProducts: allProducts,
       searchResults: searchResults,
       category:category
-    });
+    })
   } catch (error) {
     console.error(error);
     res.status(500).send('Internal Server Error');

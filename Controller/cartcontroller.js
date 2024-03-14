@@ -62,7 +62,7 @@ module.exports = {
       if (existingItem) {
         const categories = await Category.find();
         return res.render('userviews/productdetails',{error:'Item already in the cart',title:'Product details',category: categories});
-      } else {
+      } else { 
         cart.items.push({ product: productId, quantity: parseInt(quantity) });
       }
 

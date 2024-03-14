@@ -271,7 +271,10 @@ img {
                 <% if (product.stock >= 1) { %>
                     <div class="action">
                         <button class="add-to-cart btn btn-primary" type="button">add to cart</button>
-                        <button class="like btn btn-danger" type="button"><span class="fa fa-heart"></span></button>
+                        <button class="like btn btn-danger <%= productInWishlist ? 'wishlisted' : '' %>" type="button" onclick="addToWishlist('<%= product._id %>')">
+                          <span class="fa fa-heart"></span>
+                          <%= productInWishlist ? 'Wishlisted' : 'Add to Wishlist' %>
+                        </button>
                         <% if (typeof error !== 'undefined') { %>
                           <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <%= error %>
@@ -282,7 +285,9 @@ img {
                 <% } else { %>
                     <div class="action" style="pointer-events: none; opacity: 0.5;">
                         <button class="add-to-cart btn btn-primary" type="button" disabled>Out of Stock</button>
-                        <button class="like btn btn-danger" type="button" disabled><span class="fa fa-heart"></span></button>
+                        <!-- <button class="like btn btn-danger" type="button" onclick="addToWishlist('<%= product._id %>')">
+                          <span class="fa fa-heart"></span> 
+                        </button> -->
                     </div>
                 <% } %>
             </div>
@@ -323,7 +328,6 @@ img {
           if (data) {
             console.log(data);
 
-            // Display SweetAlert for successful product addition
             Swal.fire({
               title: 'Success',
               text: 'Product successfully added to the cart.',
@@ -340,6 +344,49 @@ img {
         });
     });
   });
+</script>
+
+<script>
+  function addToWishlist(productId) {
+  fetch('/addtowishlist', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ productId }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.message === 'Product added to wishlist successfully') {
+      // Swal.fire({
+      //   title: 'Success',
+      //   text: 'Product added to wishlist successfully',
+      //   icon: 'success',
+      // });
+
+      const productInWishlist = data.inWishlist;
+      const likeButton = document.querySelector('.like');
+      likeButton.textContent = productInWishlist ? 'Wishlisted' : 'Add to Wishlist';
+      likeButton.classList.toggle('wishlisted', productInWishlist);
+    } else {
+      // Swal.fire({
+      //   text: 'Product already exist in your wishlist',
+      //   icon: 'error',
+      // });
+    }
+  })
+  .catch(error => {
+    console.error('Error adding product to wishlist:', error);
+    Swal.fire({
+      title: 'Error',
+      text: 'An error occurred while adding the product to the wishlist',
+      icon: 'error',
+    });
+  });
+  window.location.reload()
+}
+
 </script>
 
 <%-include('./footer')%>

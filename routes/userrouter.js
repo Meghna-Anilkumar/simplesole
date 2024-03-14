@@ -10,9 +10,11 @@ const bcrypt = require('bcrypt')
 const categorycontroller = require('../Controller/categorycontroller');
 const isAuth = require('../middlewares/isAuth')
 const UserDetails = require('../models/userdetails')
+const Wishlist = require('../models/wishlist');
 const cartcontroller = require('../Controller/cartcontroller')
 const checkoutcontroller = require('../Controller/checkoutcontroller')
 const ordercontroller = require('../Controller/ordercontroller')
+const wishlistcontroller = require('../Controller/wishlistcontroller')
 
 
 //user
@@ -53,13 +55,24 @@ router.get('/proceedtocheckout', isAuth.checkAuth, checkoutcontroller.checkoutpa
 //place order
 router.post('/placeOrder', isAuth.checkAuth, ordercontroller.placeorder)
 router.post('/process-payment', isAuth.checkAuth, ordercontroller.processPayment);
+router.get('/successpage', isAuth.checkAuth, ordercontroller.getsuccesspage)
 
 //my orders
 router.get('/orders', isAuth.checkAuth, ordercontroller.myorders)
 router.get('/orderdetails/:orderId', isAuth.checkAuth, ordercontroller.orderdetails)
-router.post('/confirmCancellation/:orderId',ordercontroller.confirmcancellation)
+router.post('/confirmCancellation/:orderId', ordercontroller.confirmcancellation)
 router.post('/confirmItemCancellation/:orderId/:index', ordercontroller.confirmItemCancellation)
+router.post('/confirmReturn/:orderId', isAuth.checkAuth, ordercontroller.returnorder)
 
 
+
+//wishlist
+router.get('/wishlist', wishlistcontroller.getwishlistpage)
+router.post('/addtowishlist', wishlistcontroller.addtowishlist)
+router.post('/removefromwishlist', wishlistcontroller.removefromwishlist)
+
+
+//wallet
+router.get('/wallet', ordercontroller.getwalletpage)
 
 module.exports = router

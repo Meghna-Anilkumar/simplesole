@@ -51,7 +51,7 @@ const orderSchema = new mongoose.Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'],
+        enum: ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED','RETURNED'],
         default: 'PENDING'
     },
     orderdate: {
@@ -66,6 +66,12 @@ const orderSchema = new mongoose.Schema({
         required: function () {
             return this.orderStatus === 'CANCELLED'
         }   
+    },
+    returnReason: {
+        type: String,
+        required: function () {
+            return this.orderStatus === 'DELIVERED';
+        }
     },
 
 })
