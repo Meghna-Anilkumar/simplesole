@@ -15,7 +15,7 @@ const cartcontroller = require('../Controller/cartcontroller')
 const checkoutcontroller = require('../Controller/checkoutcontroller')
 const ordercontroller = require('../Controller/ordercontroller')
 const wishlistcontroller = require('../Controller/wishlistcontroller')
-
+const couponcontroller=require('../Controller/couponcontroller')
 
 //user
 router.get(['/', '/home'], usercontroller.homepage)
@@ -74,5 +74,9 @@ router.post('/removefromwishlist', wishlistcontroller.removefromwishlist)
 
 //wallet
 router.get('/wallet', ordercontroller.getwalletpage)
+
+//coupons
+router.get('/coupons', couponcontroller.coupons)
+router.post('/applyCoupon',couponcontroller.applyCoupon)
 
 module.exports = router

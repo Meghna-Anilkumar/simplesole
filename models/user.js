@@ -22,6 +22,11 @@ const userSchema = new mongoose.Schema({
         
     },
     blocked: { type: Boolean, default: false },
+
+    usedCoupons:{
+        type:Array,
+        default:[]
+    }
 })
 
 userSchema.pre('save', async function (next) {

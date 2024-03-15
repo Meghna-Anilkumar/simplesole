@@ -28,6 +28,7 @@ const store = new MongoDBSession({
 })
 
 // middlewares
+app.use(bodyParser.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(morgan('tiny'));
@@ -64,11 +65,8 @@ app.use((req, res, next) => {
 
 app.use(express.static('uploads'))//to display the uploaded files
 app.use(express.static('public'))
-app.use(bodyParser.json())
 app.use(cookieParser())
 
-
-//set template engine
 app.set('view engine', 'ejs')
 
 //route prefix

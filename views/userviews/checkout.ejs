@@ -400,6 +400,25 @@
       border-radius: 2px;
       letter-spacing: 1px;
     }
+
+    .coupon-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .coupon {
+    border: 2px solid #ff69b4; /* Pink border color */
+    background-color: #fff; /* White background color */
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    max-width: 200px; /* Limiting the maximum width */
+  }
+
+  .coupon p {
+    margin: 5px 0;
+  }
   </style>
 
   <div class="container">
@@ -434,15 +453,21 @@
       <p>SHIPPING</p>
       <p>APPLY COUPON</p>
                 <input id="code" placeholder="Enter coupon code">
+                <button id="applyCouponBtn" class="button-base-button">Apply</button>
 
       <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
         <div class="col">TOTAL PRICE</div>
-        <div class="col text-right">&#8377;<%= cart.total %>
+        <div class="col text-right">&#8377;<span id="newTotal"><%= cart.total %></span></div>
         </div>
       </div>
     </div>
   </div>
-
+<br>
+  <div class="container">
+    <button id="viewCouponsBtn" class="button-base-button">View Available Coupons</button>
+    <div class="coupon-container" id="couponsContainer">
+    </div>
+  </div>
 
   <div class="col-md-8 payment__shipping" id="shippingInfoContainer" style="margin-left: 170px;">
     <div class="payment__title">
@@ -456,6 +481,7 @@
 
   </div>
 <br>
+
   <div class="container">
     <!-- <div class="actions"> -->
     <form action="/placeOrder" method="post">
@@ -474,7 +500,7 @@
 
       <div class="payment">
         <div class="payment__title">
-          Payment Method
+          Select Payment Method
         </div>
 
         <div class="payment__types">
@@ -646,6 +672,82 @@
     
   </script>
    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+
+   <script>
+    document.addEventListener("DOMContentLoaded", async function () {
+        const viewCouponsBtn = document.getElementById('viewCouponsBtn');
+        const couponsContainer = document.getElementById('couponsContainer');
+
+        viewCouponsBtn.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/coupons');
+                const coupons = await response.json();
+
+                // Clear previous coupons
+                couponsContainer.innerHTML = '';
+
+                // Display coupons
+                coupons.forEach(coupon => {
+                    const couponDiv = document.createElement('div');
+                    couponDiv.classList.add('coupon');
+                    couponDiv.innerHTML = `
+                        <p>Coupon Code: ${coupon.couponCode}</p>
+                        <p>Discount Rate: ${coupon.discountRate}%</p>
+                        <p>Minimum Purchase Amount: ${coupon.minimumPurchaseAmount}</p>
+                        <p>Expiry Date: ${formatDate(coupon.expiryDate)}</p>
+                    `;
+                    couponsContainer.appendChild(couponDiv);
+                });
+            } catch (error) {
+                console.error('Error fetching coupons:', error);
+            }
+        });
+    });
+
+    function formatDate(date) {
+        // Format the date as required (e.g., convert to a readable format)
+        return new Date(date).toLocaleDateString();
+    }
+</script>
+
+<script>
+  // Apply Coupon Logic with Fetch
+  document.getElementById('applyCouponBtn').addEventListener('click', async () => {
+      const couponCode = document.getElementById('code').value;
+      try {
+          const response = await fetch('/applyCoupon', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ couponCode })
+          });
+          const data = await response.json();
+          if (data.success) {
+              // Update total amount displayed on the checkout page
+              document.getElementById('newTotal').innerText = data.newTotal;
+              Swal.fire({
+                  text: 'Coupon applied successfully!',
+                  icon: 'success',
+              });
+          } else {
+              Swal.fire({
+                  text: 'Coupon not applicable.',
+                  icon: 'error',
+              });
+          }
+      } catch (error) {
+          console.error('Error applying coupon:', error);
+          Swal.fire({
+              text: 'Error applying coupon. Please try again later.',
+              icon: 'error',
+          });
+      }
+  });
+</script>
+
+
 
   </div>
   <%- include('./footer') %>

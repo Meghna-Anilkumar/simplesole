@@ -48,9 +48,9 @@ router.get('/ordersview/:id', adminordercontroller.adminvieworder)
 router.post('/updateOrderStatus/:orderId', adminordercontroller.updateorderstatus)
 
 //coupons
-router.get('/coupons', couponcontroller.couponpage)
-
-
+router.get('/coupon', couponcontroller.couponpage)
+router.post('/submitcoupon',couponcontroller.createcoupon)
+router.get('/coupon', couponcontroller.getCoupons)
 
 
 
