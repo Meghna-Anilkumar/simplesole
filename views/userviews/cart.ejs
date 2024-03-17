@@ -229,13 +229,11 @@ a:hover{
         .then(data => {
             document.getElementById(productId).innerText = data.quantity;
 
-            // Update the price dynamically
             const currentPriceElement = document.getElementById(`price_${productId}`);
             const currentPrice = parseFloat(currentPriceElement.innerText.substring(2));
             const newPrice = (currentPrice / data.quantity).toFixed(2);
             currentPriceElement.innerText = `₹ ${newPrice}`;
 
-            // Update total price
             const totalPriceElement = document.getElementById('totalPrice');
             totalPriceElement.innerText = `₹ ${data.total.toFixed(2)}`;
         })
@@ -281,13 +279,12 @@ a:hover{
             });
           });
 
-        window.location.reload();
+        window.location.reload()
       }
     });
   }
 
 </script>
-
 
 </div>
 <%-include('./footer')%>

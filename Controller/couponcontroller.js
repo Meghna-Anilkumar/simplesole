@@ -68,13 +68,10 @@ module.exports = {
     //display coupons to user
     coupons: async (req, res) => {
         try {
-            // Fetch all coupons from the database
             const coupons = await Coupon.find();
-            // Send the coupons data as JSON
             res.json(coupons);
         } catch (error) {
             console.error('Error fetching coupons:', error);
-            // Send an error response if there's any issue
             res.status(500).json({ error: 'Error fetching coupons' });
         }
     },
@@ -85,43 +82,34 @@ module.exports = {
         try {
             const { couponCode } = req.body;
             console.log(couponCode, 'pppppp');
-
             const userId = req.session.user._id;
             const user = await User.findById(userId);
 
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
-
             const cart = await Cart.findOne({ user }).populate('items.product').exec();
 
             console.log('ggggggggggggggggggggggggggggg')
 
-            // Check if a coupon code is provided
             if (couponCode) {
-                // Find the coupon in the database
                 const coupon = await Coupon.findOne({ couponCode });
-
-                // Check if the coupon exists and is applicable
                 if (coupon && cart.total >= coupon.minimumPurchaseAmount) {
-                    // Check if the user has already used the coupon
+
                     if (user.usedCoupons && user.usedCoupons.includes(coupon._id)) {
                         return res.status(400).json({ error: 'You have already used this coupon.' });
                     }
 
                     console.log(user.usedCoupons, 'ppppppppp')
 
-                    // Apply the discount from the coupon
                     cart.total -= (cart.total * coupon.discountRate) / 100;
                     await cart.save();
 
-                    // Record the coupon usage for the user
                     if (!user.usedCoupons) {
                         user.usedCoupons = [];
                     }
                     user.usedCoupons.push(coupon._id);
-                    await user.save(); // Save the user with the updated usedCoupons array
-
+                    await user.save();
                     return res.json({ success: true, newTotal: cart.total });
                 } else {
                     return res.status(400).json({ error: 'Invalid or expired coupon code' });
@@ -134,6 +122,54 @@ module.exports = {
             return res.status(500).json({ error: 'Internal server error' });
         }
     },
+
+
+    //update coupon
+    editCoupon: async (req, res) => {
+        try {
+            const { editCouponId, editCouponCode, editDiscountRate, editMinPurchaseAmount, editExpiryDate } = req.body;
+            const minimumPurchaseAmount = parseFloat(editMinPurchaseAmount);
+            if (isNaN(minimumPurchaseAmount)) {
+                throw new Error('Invalid minPurchaseAmount');
+            }
+    
+            console.log('editCouponId', 'uuuuuuuuuu');
+            await Coupon.findByIdAndUpdate(editCouponId, {
+                couponCode: editCouponCode,
+                discountRate: editDiscountRate,
+                minimumPurchaseAmount: minimumPurchaseAmount,
+                expiryDate: editExpiryDate
+            });
+    
+            console.log('Coupon updated successfully');
+    
+            const coupons = await Coupon.find();
+            const coupon = await Coupon.findById(editCouponId); 
+            res.render('adminviews/coupon', {
+                title: 'Coupon Page',
+                coupons: coupons,
+                coupon: coupon 
+            });
+        } catch (error) {
+            console.error('Error updating coupon:', error);
+            res.status(500).send('Error updating coupon');
+        }
+    },
+
+
+    // Delete coupon
+deleteCoupon: async (req, res) => {
+    try {
+        const { id } = req.params;
+        await Coupon.findByIdAndDelete(id);
+        console.log('Coupon deleted successfully');
+        res.redirect('/coupon')
+    } catch (error) {
+        console.error('Error deleting coupon:', error);
+        res.status(500).send('Error deleting coupon');
+    }
+}
+
 
 
 }

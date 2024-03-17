@@ -434,6 +434,12 @@
     <div class="notification">
       Complete Your Purchase
     </div>
+    <% if (typeof error !== 'undefined') { %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <%= error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %> 
   </div>
   <div class="container">
     <br>
@@ -640,12 +646,13 @@
               .then((data) => {
                 console.log("Payment details sent to the server:", data);
                 if (data.success) {
-                  window.location.href = "userviews/successpage";
                 }
               })
+             
               .catch((error) => {
                 console.error("Error sending payment details to the server:", error);
               });
+              window.location.href ='/successpage'
             return this;
           },
           notes: {
@@ -668,6 +675,7 @@
         rzp1.open()
       }
   document.getElementById('placeorderButton').closest('form').submit()
+
 });
     
   </script>
@@ -684,10 +692,8 @@
                 const response = await fetch('/coupons');
                 const coupons = await response.json();
 
-                // Clear previous coupons
                 couponsContainer.innerHTML = '';
 
-                // Display coupons
                 coupons.forEach(coupon => {
                     const couponDiv = document.createElement('div');
                     couponDiv.classList.add('coupon');
@@ -706,13 +712,11 @@
     });
 
     function formatDate(date) {
-        // Format the date as required (e.g., convert to a readable format)
         return new Date(date).toLocaleDateString();
     }
 </script>
 
 <script>
-  // Apply Coupon Logic with Fetch
   document.getElementById('applyCouponBtn').addEventListener('click', async () => {
       const couponCode = document.getElementById('code').value;
       try {
@@ -725,7 +729,6 @@
           });
           const data = await response.json();
           if (data.success) {
-              // Update total amount displayed on the checkout page
               document.getElementById('newTotal').innerText = data.newTotal;
               Swal.fire({
                   text: 'Coupon applied successfully!',

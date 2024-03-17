@@ -55,7 +55,12 @@ module.exports = {
       else if (paymentMethod === 'WALLET') {
         const userWallet = await Wallet.findOne({ user });
         if (!userWallet || userWallet.balance < cart.total) {
-          return res.status(400).json({ error: 'Insufficient balance in the wallet' });
+          const user = req.session.user
+        const order=await Order.find()
+        const categories = await Category.find();
+        const addresses = await Address.find({ user: user });
+        const cart = await Cart.findOne({ user }).populate('items.product').exec();
+          return res.render('userviews/checkout',{title: 'checkout page', category: categories, cart, addresses: addresses ,order, error: 'Insufficient balance in the wallet' });
         }
 
         const newOrder = new Order({
@@ -78,15 +83,16 @@ module.exports = {
 
         userWallet.balance -= cart.total;
         transactiontype = 'DEBIT'
-        await userWallet.save();
+        await userWallet.save()
 
-        await newOrder.save();
-        cart.items = [];
-        cart.total = 0;
-        await cart.save();
+        await newOrder.save()
+        cart.items = []
+        cart.total = 0
+        await cart.save()
 
         return res.render('userviews/successpage');
       }
+      
 
     } catch (error) {
       console.error(error);
@@ -130,11 +136,11 @@ module.exports = {
           await newOrder.save();
 
           await Cart.findOneAndDelete({ user: user });
-
-          return res.status(200).json({ success: true, order: newOrder });
+          console.log('rendering successpage.........')
+          
         })
       } else {
-
+          
       }
     } catch (error) {
       console.error('Error processing payment:', error);
@@ -142,7 +148,6 @@ module.exports = {
       res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
   },
-
 
 
   // get my orders page
@@ -206,9 +211,8 @@ module.exports = {
           }
         }));
 
-        // Check if payment method is online payment or wallet
         if (order.paymentMethod === 'Online Payment' || order.paymentMethod === 'Wallet' || order.paymentMethod === 'RAZORPAY') {
-          // Add the cancelled amount to the user's wallet
+          
           const userWallet = await Wallet.findOne({ user: order.user });
           if (userWallet) {
             userWallet.balance += order.totalAmount;
@@ -297,30 +301,31 @@ module.exports = {
   //get wallet page
   getwalletpage: async (req, res) => {
     try {
-      const user = req.session.user;
-      const wallet = await Wallet.findOne({ user });
+        const user = req.session.user;
+        let wallet = await Wallet.findOne({ user });
 
-      if (!wallet) {
-        return res.status(404).send('Wallet not found');
-      }
+        if (!wallet) {
+            wallet = new Wallet({ user });
+            await wallet.save();
+        }
 
-      const categories = await Category.find();
-      const walletBalance = wallet.balance;
-      const transactiontype = wallet.transactiontype;
+        const categories = await Category.find();
+        const walletBalance = wallet.balance;
+        const transactiontype = wallet.transactiontype;
 
-      return res.render('userviews/wallet', {
-        title: 'Wallet',
-        wallet,
-        category: categories,
-        user,
-        walletBalance,
-        transactiontype
-      });
+        return res.render('userviews/wallet', {
+            title: 'Wallet',
+            wallet,
+            category: categories,
+            user,
+            walletBalance,
+            transactiontype
+        });
     } catch (error) {
-      console.error('Error fetching wallet balance:', error);
-      return res.status(500).send('Internal Server Error');
+        console.error('Error fetching wallet balance:', error);
+        return res.status(500).send('Internal Server Error');
     }
-  },
+},
 
 
   //return order
@@ -354,7 +359,6 @@ module.exports = {
           await userWallet.save();
         }
 
-        // Update order status and add return reason
         order.orderStatus = 'RETURNED';
         order.returnReason = returnReason || '';
         await order.save();
@@ -372,3 +376,7 @@ module.exports = {
 
 
 }
+
+
+
+

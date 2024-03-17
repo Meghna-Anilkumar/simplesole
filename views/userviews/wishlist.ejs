@@ -143,13 +143,11 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Use event delegation to handle click events for all buttons with class 'table-wishlist'
         document.querySelector('.table-wishlist').addEventListener('click', function (event) {
             const target = event.target;
 
-            // Check if the clicked element is a button with class 'add-to-cart'
             if (target.classList.contains('add-to-cart')) {
-                // Get the product ID and quantity from the data attributes
+               
                 const productId = target.getAttribute('data-product-id');
                 const quantity = target.getAttribute('data-quantity');
 
@@ -195,14 +193,12 @@
     });
 
     function removeFromWishlist(productId) {
-    // Implement the logic to remove the product from the wishlist
     const wishlistItem = document.querySelector(`[data-product-id="${productId}"]`);
     
     if (wishlistItem) {
-        wishlistItem.parentElement.parentElement.remove(); // Remove the entire row from the wishlist table
+        wishlistItem.parentElement.parentElement.remove(); 
     }
 
-    // You can also make an AJAX request to the server to remove the product from the wishlist
     fetch('/removeFromWishlist', {
         method: 'POST',
         headers: {

@@ -9,18 +9,15 @@ module.exports = {
     //get wishlist page
     getwishlistpage: async (req, res) => {
         try {
-            // Fetch the user's wishlist
             const user = req.session.user;
         
             if (!user) {
-              // Redirect to login or handle not authenticated users
               return res.redirect('/login');
             }
         
             const wishlist = await Wishlist.findOne({ user: user._id }).populate('items.product');
             const categories = await Category.find();
             const cart = await Cart.findOne({ user }).populate('items.product').exec();
-
         
             if (!wishlist) {
               return res.render('userviews/wishlist', { allProducts: [] , title: 'Wishlist', category: categories, cart}); 
@@ -73,8 +70,6 @@ module.exports = {
     removefromwishlist:async (req, res) => {
         try {
             const { productId } = req.body;
-    
-            // Find the user's wishlist and remove the product
             const user = req.session.user;
             const wishlist = await Wishlist.findOne({ user: user._id });
     

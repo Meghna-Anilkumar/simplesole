@@ -30,7 +30,7 @@ router.post('/editprofiledetails', usercontroller.editprofiledetails)
 router.get('/category/:categoryId', productcontroller.getproductsCategorywise)
 router.get('/products/:id', productcontroller.getproductdetails)
 router.get('/seeallproducts', productcontroller.getAllProducts)
-router.get('/search', productcontroller.searchproducts)
+router.get('/search', productcontroller.getAllProducts)
 
 //address
 router.get('/address', usercontroller.getaddressbook)
@@ -78,5 +78,7 @@ router.get('/wallet', ordercontroller.getwalletpage)
 //coupons
 router.get('/coupons', couponcontroller.coupons)
 router.post('/applyCoupon',couponcontroller.applyCoupon)
+
+
 
 module.exports = router

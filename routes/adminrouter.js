@@ -51,8 +51,8 @@ router.post('/updateOrderStatus/:orderId', adminordercontroller.updateorderstatu
 router.get('/coupon', couponcontroller.couponpage)
 router.post('/submitcoupon',couponcontroller.createcoupon)
 router.get('/coupon', couponcontroller.getCoupons)
-
-
+router.post('/updatecoupon', couponcontroller.editCoupon);
+router.post('/deletecoupon/:id', couponcontroller.deleteCoupon)
 
 
 module.exports = router
