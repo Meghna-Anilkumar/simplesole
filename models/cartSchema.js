@@ -21,6 +21,15 @@ const cartSchema = new mongoose.Schema({
     default: 0
   },
 
+  newTotal:{
+    type: Number,
+    default: 0
+  },
+
+  couponApplied: {
+    type: String,
+  }
+
 });
 
 module.exports = mongoose.model('Cart', cartSchema);

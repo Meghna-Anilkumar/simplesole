@@ -458,12 +458,14 @@
 
       <p>SHIPPING</p>
       <p>APPLY COUPON</p>
-                <input id="code" placeholder="Enter coupon code">
-                <button id="applyCouponBtn" class="button-base-button">Apply</button>
+                <input id="code" placeholder="Enter coupon code" name="couponcode">
+                <button id="applyCouponBtn" class="button-base-button" data-applied="false">Apply</button>
+
 
       <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">
         <div class="col">TOTAL PRICE</div>
         <div class="col text-right">&#8377;<span id="newTotal"><%= cart.total %></span></div>
+
         </div>
       </div>
     </div>
@@ -491,6 +493,8 @@
   <div class="container">
     <!-- <div class="actions"> -->
     <form action="/placeOrder" method="post">
+
+      <input type="hidden" id="appliedCouponCode" name="appliedCouponCode" value="">
       <div class="addresses-container">
         <% addresses.forEach(address=> { %>
           <div class="details__user" id="<%= 'user_' + address._id %>">
@@ -602,6 +606,7 @@
 
       const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
       const selectedPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
+      const appliedCouponCode = document.getElementById('appliedCouponCode').value;
 
       if (!selectedAddress) {
         Swal.fire({
@@ -622,7 +627,7 @@
       if (selectedPaymentMethod.value === 'RAZORPAY') {
         var options = {
           key: "rzp_test_RXM5ojGKCHke94",
-          amount: "<%= cart.total * 100 %>",
+          amount: "<%= cart.newTotal ? cart.newTotal * 100 : cart.total * 100 %>",
           currency: "INR",
           name: "Simple Sole",
           description: "Test Transaction",
@@ -717,40 +722,68 @@
 </script>
 
 <script>
-  document.getElementById('applyCouponBtn').addEventListener('click', async () => {
+  document.addEventListener("DOMContentLoaded", async function () {
+    const applyCouponBtn = document.getElementById('applyCouponBtn');
+    const newTotalSpan = document.getElementById('newTotal');
+    const appliedCouponCodeInput = document.getElementById('appliedCouponCode');
+
+    applyCouponBtn.addEventListener('click', async () => {
       const couponCode = document.getElementById('code').value;
+      const applied = applyCouponBtn.dataset.applied === 'true';
+
       try {
-          const response = await fetch('/applyCoupon', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({ couponCode })
+        if (applied) {
+          // Remove coupon logic
+          const response = await fetch('/removeCoupon', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            }
           });
           const data = await response.json();
           if (data.success) {
-              document.getElementById('newTotal').innerText = data.newTotal;
-              Swal.fire({
-                  text: 'Coupon applied successfully!',
-                  icon: 'success',
-              });
-          } else {
-              Swal.fire({
-                  text: 'Coupon not applicable.',
-                  icon: 'error',
-              });
+            applyCouponBtn.innerText = 'Apply';
+            applyCouponBtn.dataset.applied = 'false';
+            newTotalSpan.innerText = data.newTotal;
+
+            // Update the value of the hidden input field
+            appliedCouponCodeInput.value = '';
           }
-      } catch (error) {
-          console.error('Error applying coupon:', error);
-          Swal.fire({
-              text: 'Error applying coupon. Please try again later.',
-              icon: 'error',
+        } else {
+          // Apply coupon logic
+          const response = await fetch('/applyCoupon', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ couponCode })
           });
+          const data = await response.json();
+          if (data.success) {
+            applyCouponBtn.innerText = 'Remove';
+            applyCouponBtn.dataset.applied = 'true';
+            newTotalSpan.innerText = data.newTotal;
+
+            // Update the value of the hidden input field
+            appliedCouponCodeInput.value = couponCode;
+          }
+          else {
+            Swal.fire({
+              text: 'Coupon not applicable.',
+              icon: 'error',
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error applying/removing coupon:', error);
+        Swal.fire({
+          text: 'Error applying/removing coupon. Please try again later.',
+          icon: 'error',
+        });
       }
+    });
   });
 </script>
-
-
 
   </div>
   <%- include('./footer') %>

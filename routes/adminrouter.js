@@ -15,6 +15,8 @@ const isAuth = require('../middlewares/isAuth')
 const adminAuth = require('../middlewares/adminAuth')
 const adminordercontroller = require('../Controller/adminordercontroller')
 const couponcontroller=require('../Controller/couponcontroller')
+const productoffercontroller=require('../Controller/productoffercontroller')
+const categoryoffercontroller=require('../Controller/categoryoffercontroller')
 
 
 
@@ -39,6 +41,7 @@ router.post('/updateProduct/:id', uploadMiddleware, productcontroller.updateprod
 router.post('/verify-otp', customercontroller.verifyotp)
 router.post('/blockProduct', productcontroller.blockProduct)
 
+
 //admin logout
 router.get('/adminlogout',admincontroller.adminlogout)
 
@@ -53,6 +56,20 @@ router.post('/submitcoupon',couponcontroller.createcoupon)
 router.get('/coupon', couponcontroller.getCoupons)
 router.post('/updatecoupon', couponcontroller.editCoupon);
 router.post('/deletecoupon/:id', couponcontroller.deleteCoupon)
+
+//product offers
+router.get('/productoffer', productoffercontroller.getproductofferpage)
+router.post('/save-product-offer',productoffercontroller.saveProductOffer)
+router.get('/productoffer', productoffercontroller.getproductoffers)
+router.post('/update-product-offer',productoffercontroller.updateProductOffer)
+router.post('/delete-product-offer/:id',productoffercontroller.deleteproductoffer)
+
+//category offers
+router.get('/categoryoffer',categoryoffercontroller.getcategoryofferspage)
+router.post('/save-category-offer',categoryoffercontroller.savecategoryoffer)
+router.post('/update-category-offer',categoryoffercontroller.updatecategoryoffer)
+
+
 
 
 module.exports = router

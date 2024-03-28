@@ -78,7 +78,7 @@ router.get('/wallet', ordercontroller.getwalletpage)
 //coupons
 router.get('/coupons', couponcontroller.coupons)
 router.post('/applyCoupon',couponcontroller.applyCoupon)
-
+router.post('/removeCoupon',couponcontroller.removeCoupon)
 
 
 module.exports = router

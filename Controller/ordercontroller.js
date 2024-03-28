@@ -7,6 +7,8 @@ const Order = require('../models/orderSchema')
 const Razorpay = require('razorpay')
 const Wallet = require('../models/wallet')
 const crypto = require('crypto')
+const Coupon = require('../models/coupon')
+const User = require('../models/user')
 require('dotenv').config()
 
 //Razorpay instance
@@ -19,16 +21,22 @@ module.exports = {
 
   placeorder: async (req, res) => {
     try {
-      const { paymentMethod } = req.body;
+      const { paymentMethod, appliedCouponCode } = req.body;
       console.log('Received data:', req.body);
       const user = req.session.user;
       const cart = await Cart.findOne({ user }).populate('items.product').exec();
 
+      console.log(appliedCouponCode, 'lllllllllll')
+
+      console.log(user,'pppppp')
+
+   
+    
       const newOrder = new Order({
         user: req.session.user,
         items: cart.items,
         shippingAddress: req.body.selectedAddress,
-        totalAmount: cart.total,
+        totalAmount: cart.newTotal || cart.total,
         paymentMethod,
       });
 
@@ -43,7 +51,6 @@ module.exports = {
       );
 
       if (paymentMethod === 'CASH_ON_DELIVERY') {
-
         await newOrder.save();
         cart.items = [];
         cart.total = 0;
@@ -56,18 +63,18 @@ module.exports = {
         const userWallet = await Wallet.findOne({ user });
         if (!userWallet || userWallet.balance < cart.total) {
           const user = req.session.user
-        const order=await Order.find()
-        const categories = await Category.find();
-        const addresses = await Address.find({ user: user });
-        const cart = await Cart.findOne({ user }).populate('items.product').exec();
-          return res.render('userviews/checkout',{title: 'checkout page', category: categories, cart, addresses: addresses ,order, error: 'Insufficient balance in the wallet' });
+          const order = await Order.find()
+          const categories = await Category.find();
+          const addresses = await Address.find({ user: user });
+          const cart = await Cart.findOne({ user }).populate('items.product').exec();
+          return res.render('userviews/checkout', { title: 'checkout page', category: categories, cart, addresses: addresses, order, error: 'Insufficient balance in the wallet' });
         }
 
         const newOrder = new Order({
           user: req.session.user,
           items: cart.items,
           shippingAddress: req.body.selectedAddress,
-          totalAmount: cart.total,
+          totalAmount: cart.newTotal || cart.total,
           paymentMethod,
         });
 
@@ -92,7 +99,6 @@ module.exports = {
 
         return res.render('userviews/successpage');
       }
-      
 
     } catch (error) {
       console.error(error);
@@ -109,7 +115,7 @@ module.exports = {
 
       if (paymentMethod === 'RAZORPAY') {
         console.log('hiiiiiii');
-        const amountInPaise = Math.round(cart.total * 100);
+        const amountInPaise = Math.round(cart.newTotal || cart.total * 100);
         const razorpayOptions = {
           amount: amountInPaise,
           currency: 'INR',
@@ -127,20 +133,21 @@ module.exports = {
           const newOrder = new Order({
             user: user,
             items: cart.items,
-            totalAmount: cart.total,
+            totalAmount: cart.newTotal || cart.total,
             shippingAddress: req.body.selectedAddress,
             paymentMethod: 'RAZORPAY',
             paymentStatus: 'paid',
             razorpayOrderId: razorpayOrder.id,
-          });
-          await newOrder.save();
+          })
+
+          await newOrder.save()
 
           await Cart.findOneAndDelete({ user: user });
           console.log('rendering successpage.........')
-          
+
         })
       } else {
-          
+
       }
     } catch (error) {
       console.error('Error processing payment:', error);
@@ -212,7 +219,7 @@ module.exports = {
         }));
 
         if (order.paymentMethod === 'Online Payment' || order.paymentMethod === 'Wallet' || order.paymentMethod === 'RAZORPAY') {
-          
+
           const userWallet = await Wallet.findOne({ user: order.user });
           if (userWallet) {
             userWallet.balance += order.totalAmount;
@@ -301,31 +308,31 @@ module.exports = {
   //get wallet page
   getwalletpage: async (req, res) => {
     try {
-        const user = req.session.user;
-        let wallet = await Wallet.findOne({ user });
+      const user = req.session.user;
+      let wallet = await Wallet.findOne({ user });
 
-        if (!wallet) {
-            wallet = new Wallet({ user });
-            await wallet.save();
-        }
+      if (!wallet) {
+        wallet = new Wallet({ user });
+        await wallet.save();
+      }
 
-        const categories = await Category.find();
-        const walletBalance = wallet.balance;
-        const transactiontype = wallet.transactiontype;
+      const categories = await Category.find();
+      const walletBalance = wallet.balance;
+      const transactiontype = wallet.transactiontype;
 
-        return res.render('userviews/wallet', {
-            title: 'Wallet',
-            wallet,
-            category: categories,
-            user,
-            walletBalance,
-            transactiontype
-        });
+      return res.render('userviews/wallet', {
+        title: 'Wallet',
+        wallet,
+        category: categories,
+        user,
+        walletBalance,
+        transactiontype
+      });
     } catch (error) {
-        console.error('Error fetching wallet balance:', error);
-        return res.status(500).send('Internal Server Error');
+      console.error('Error fetching wallet balance:', error);
+      return res.status(500).send('Internal Server Error');
     }
-},
+  },
 
 
   //return order

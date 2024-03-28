@@ -209,7 +209,7 @@ module.exports = {
         selectedCategory: selectedCategory,
         products: products,
         product: product,
-        productInWishlist: productInWishlist, // Pass the information to the template
+        productInWishlist: productInWishlist, 
       });
     } catch (error) {
       console.error(error);
@@ -226,7 +226,7 @@ module.exports = {
       const product = await Product.findById(productId);
 
       if (!product) {
-        return res.status(404).send('Product not found');
+        return res.status(404).render('userviews/404page');
       }
 
       product.blocked = !product.blocked;

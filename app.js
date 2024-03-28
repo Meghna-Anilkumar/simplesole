@@ -4,12 +4,12 @@ const express = require('express')
 const mongoose = require('mongoose')
 const User = require('./models/user')
 const session = require('express-session')
-const cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser')
 const MongoDBSession = require('connect-mongodb-session')(session)
 const bodyParser = require('body-parser')
 const nodemailer = require('nodemailer')
-const nocache = require('nocache');
-const morgan = require('morgan');
+const nocache = require('nocache')
+const morgan = require('morgan')
 const userrouter = require('./routes/userrouter')
 const adminrouter = require('./routes/adminrouter')
 
@@ -38,7 +38,7 @@ app.use(session({
     resave: false,
     store: store,
     cookie: {
-        // maxAge: 1000 * 60 * 60 * 24 * 7, // 
+        maxAge: 1000 * 60 * 60 * 24 * 7, 
         secure: false,
     }
 }))

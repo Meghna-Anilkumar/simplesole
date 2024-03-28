@@ -16,27 +16,30 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    confirmPassword: {
-        type: String,
-        required: true,
-        
-    },
-    blocked: { type: Boolean, default: false },
+    // confirmPassword: {
+    //     type: String,
+    //     required: true,
 
-    usedCoupons:{
-        type:Array,
-        default:[]
+    // },
+    blocked: {
+        type: Boolean,
+        default: false
+    },
+
+    usedCoupons: {
+        type: Array,
+        default: []
     }
 })
 
 userSchema.pre('save', async function (next) {
     try {
         if (!this.isBlocked) {
-            const saltRounds = 10;
-            const salt = await bcrypt.genSalt(saltRounds);
-            const hashedPassword = await bcrypt.hash(this.password, salt);
+            // const saltRounds = 10;
+            // const salt = await bcrypt.genSalt(saltRounds);
+            const hashedPassword = await bcrypt.hash(this.password, 10);
             this.password = hashedPassword;
-            this.confirmPassword = hashedPassword
+            // this.confirmPassword = hashedPassword
         }
         next();
     } catch (error) {

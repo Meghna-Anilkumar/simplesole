@@ -53,16 +53,16 @@ module.exports = {
             const existingProduct = wishlist.items.find(item => item.product.toString() === productId);
     
             if (existingProduct) {
-                return res.status(400).json({ message: 'Product already exists in the wishlist' });
+                return res.status(400).json({ message: 'Product already exists in the wishlist' })
             }
     
             wishlist.items.push({ product: productId });
             await wishlist.save();
     
-            res.status(200).json({ message: 'Product added to wishlist successfully' });
+            res.status(200).json({ message: 'Product added to wishlist successfully' })
         } catch (error) {
-            console.error('Error adding product to wishlist:', error);
-            res.status(500).json({ message: 'Internal Server Error' });
+            console.error('Error adding product to wishlist:', error)
+            res.status(500).json({ message: 'Internal Server Error' })
         }
     },
 

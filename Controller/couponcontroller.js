@@ -21,7 +21,6 @@ module.exports = {
         }
     },
 
-
     createcoupon: async (req, res) => {
         try {
             console.log(req.body, 'ooooooooo')
@@ -30,17 +29,14 @@ module.exports = {
             if (isNaN(minimumPurchaseAmount)) {
                 throw new Error('Invalid minPurchaseAmount');
             }
-
             const newCoupon = new Coupon({
                 couponCode,
                 discountRate,
                 minimumPurchaseAmount,
                 expiryDate
             })
-
             await newCoupon.save()
             console.log('coupon added successfully')
-
             const coupons = await Coupon.find()
             res.render('adminviews/coupon', {
                 title: 'Coupon Page',
@@ -77,52 +73,75 @@ module.exports = {
     },
 
 
-    // Apply coupon
-    applyCoupon: async (req, res) => {
-        try {
-            const { couponCode } = req.body;
-            console.log(couponCode, 'pppppp');
-            const userId = req.session.user._id;
-            const user = await User.findById(userId);
+// Apply coupon
+applyCoupon: async (req, res) => {
+    try {
+        const { couponCode } = req.body;
+        const userId = req.session.user._id;
+        const user = await User.findById(userId);
 
-            if (!user) {
-                return res.status(404).json({ error: 'User not found' });
-            }
-            const cart = await Cart.findOne({ user }).populate('items.product').exec();
-
-            console.log('ggggggggggggggggggggggggggggg')
-
-            if (couponCode) {
-                const coupon = await Coupon.findOne({ couponCode });
-                if (coupon && cart.total >= coupon.minimumPurchaseAmount) {
-
-                    if (user.usedCoupons && user.usedCoupons.includes(coupon._id)) {
-                        return res.status(400).json({ error: 'You have already used this coupon.' });
-                    }
-
-                    console.log(user.usedCoupons, 'ppppppppp')
-
-                    cart.total -= (cart.total * coupon.discountRate) / 100;
-                    await cart.save();
-
-                    if (!user.usedCoupons) {
-                        user.usedCoupons = [];
-                    }
-                    user.usedCoupons.push(coupon._id);
-                    await user.save();
-                    return res.json({ success: true, newTotal: cart.total });
-                } else {
-                    return res.status(400).json({ error: 'Invalid or expired coupon code' });
-                }
-            } else {
-                return res.status(400).json({ error: 'Coupon code is required' });
-            }
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({ error: 'Internal server error' });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
         }
-    },
 
+        const cart = await Cart.findOne({ user }).populate('items.product').exec()
+
+        if (!couponCode) {
+            return res.status(400).json({ error: 'Coupon code is required' })
+        }
+
+        const coupon = await Coupon.findOne({ couponCode });
+
+        if (!coupon) {
+            return res.status(400).json({ error: 'Invalid or expired coupon code' });
+        }
+
+        if (cart.total < coupon.minimumPurchaseAmount) {
+            return res.status(400).json({ error: 'Minimum purchase amount not met for this coupon' });
+        }
+
+        if (user.usedCoupons && user.usedCoupons.includes(coupon._id.toString())) {
+            return res.status(400).json({ error: 'You have already used this coupon.' })
+        }
+
+        console.log(coupon.discountRate,'kkkkkkk')
+
+        const discount = (cart.total * coupon.discountRate) / 100;
+        const newTotal = cart.total - discount;
+        cart.newTotal = newTotal;
+        await cart.save() 
+
+        return res.json({ success: true, newTotal: newTotal, coupon: coupon });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+},
+
+
+// Remove coupon
+removeCoupon: async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const cart = await Cart.findOne({ user }).populate('items.product').exec();
+
+            cart.newTotal = cart.total
+            await cart.save();
+
+            await user.save();
+
+            return res.json({ success: true, newTotal: cart.newTotal });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ error: 'Internal server error' });
+    }
+},
 
     //update coupon
     editCoupon: async (req, res) => {
@@ -132,7 +151,7 @@ module.exports = {
             if (isNaN(minimumPurchaseAmount)) {
                 throw new Error('Invalid minPurchaseAmount');
             }
-    
+
             console.log('editCouponId', 'uuuuuuuuuu');
             await Coupon.findByIdAndUpdate(editCouponId, {
                 couponCode: editCouponCode,
@@ -140,15 +159,15 @@ module.exports = {
                 minimumPurchaseAmount: minimumPurchaseAmount,
                 expiryDate: editExpiryDate
             });
-    
+
             console.log('Coupon updated successfully');
-    
+
             const coupons = await Coupon.find();
-            const coupon = await Coupon.findById(editCouponId); 
+            const coupon = await Coupon.findById(editCouponId);
             res.render('adminviews/coupon', {
                 title: 'Coupon Page',
                 coupons: coupons,
-                coupon: coupon 
+                coupon: coupon
             });
         } catch (error) {
             console.error('Error updating coupon:', error);
@@ -158,17 +177,17 @@ module.exports = {
 
 
     // Delete coupon
-deleteCoupon: async (req, res) => {
-    try {
-        const { id } = req.params;
-        await Coupon.findByIdAndDelete(id);
-        console.log('Coupon deleted successfully');
-        res.redirect('/coupon')
-    } catch (error) {
-        console.error('Error deleting coupon:', error);
-        res.status(500).send('Error deleting coupon');
+    deleteCoupon: async (req, res) => {
+        try {
+            const { id } = req.params;
+            await Coupon.findByIdAndDelete(id);
+            console.log('Coupon deleted successfully');
+            res.redirect('/coupon')
+        } catch (error) {
+            console.error('Error deleting coupon:', error);
+            res.status(500).send('Error deleting coupon');
+        }
     }
-}
 
 
 

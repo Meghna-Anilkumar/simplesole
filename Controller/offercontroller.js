@@ -1,5 +1,0 @@
-const Category = require('../models/category')
-const isAuth = require('../middlewares/isAuth')
-const Product = require('../models/product')
-const Order = require('../models/orderSchema')
-const User = require('../models/user')

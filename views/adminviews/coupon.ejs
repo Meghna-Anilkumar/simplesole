@@ -126,6 +126,29 @@
     
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
+    <script>
+        // Populate edit coupon modal fields when edit button is clicked
+        document.querySelectorAll('.edit-coupon-btn').forEach(function (button) {
+            button.addEventListener('click', function () {
+                const couponId = button.dataset.couponId;
+                const couponCode = button.dataset.couponCode;
+                const discountRate = button.dataset.discountRate;
+                const minPurchaseAmount = button.dataset.minPurchaseAmount;
+                const expiryDate = button.dataset.expiryDate;
+    
+                // Populate edit modal fields with coupon details
+                document.querySelector('#editCouponId').value = couponId;
+                document.querySelector('#editCouponCode').value = couponCode;
+                document.querySelector('#editDiscountRate').value = discountRate;
+                document.querySelector('#editMinPurchaseAmount').value = minPurchaseAmount;
+                document.querySelector('#editExpiryDate').value = expiryDate;
+    
+                // Show the edit modal
+                $('#editCouponModal').modal('show');
+            });
+        });
+    </script>
+
 <script>
     document.querySelectorAll('.delete-coupon-btn').forEach(function (button) {
         button.addEventListener('click', function () {
@@ -140,7 +163,6 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                   
                     fetch(`/deletecoupon/${couponId}`, {
                         method: 'POST'
                     })
@@ -156,6 +178,7 @@
                         console.error('Error deleting coupon:', error);
                        
                     });
+                    window.location.reload();
                 }
             });
         });
