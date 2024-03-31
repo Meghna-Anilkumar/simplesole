@@ -60,6 +60,11 @@
         <p>Status: <%= order.orderStatus %></p>
         <p>Payment Method: <%= order.paymentMethod %></p>
         <!-- Add more order information as needed -->
+        <% if (order.orderStatus === 'DELIVERED') { %>
+          <form action="/download-invoice/<%= order._id %>" method="GET">
+              <button type="submit" class="btn btn-primary">Download Invoice</button>
+          </form>
+      <% } %>
       </div>
 
       <!-- Product Information Box -->

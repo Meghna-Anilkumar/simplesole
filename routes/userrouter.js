@@ -63,7 +63,7 @@ router.get('/orderdetails/:orderId', isAuth.checkAuth, ordercontroller.orderdeta
 router.post('/confirmCancellation/:orderId', ordercontroller.confirmcancellation)
 router.post('/confirmItemCancellation/:orderId/:index', ordercontroller.confirmItemCancellation)
 router.post('/confirmReturn/:orderId', isAuth.checkAuth, ordercontroller.returnorder)
-
+router.get('/download-invoice/:orderId',ordercontroller.downloadinvoice)
 
 
 //wishlist

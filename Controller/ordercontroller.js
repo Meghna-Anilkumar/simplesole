@@ -9,7 +9,17 @@ const Wallet = require('../models/wallet')
 const crypto = require('crypto')
 const Coupon = require('../models/coupon')
 const User = require('../models/user')
+const easyinvoice=require('easyinvoice')
 require('dotenv').config()
+const path = require('path');
+const fs = require('fs');
+const PDFDocument = require('pdfkit');
+const pdf = require('html-pdf');
+const ejs=require('ejs');
+// const puppeteer = require('puppeteer');
+
+
+
 
 //Razorpay instance
 const instance = new Razorpay({
@@ -381,8 +391,55 @@ module.exports = {
   },
 
 
+  //download invoice
+  downloadinvoice: async (req, res) => {
+    try {
+        const orderId = req.params.orderId;
+        const user=req.session.user
+
+        const order = await Order.findById(orderId).populate('items.product').populate('shippingAddress');
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        const data = {
+            order: order,
+            formattedDate: new Date(order.orderdate).toLocaleDateString(),
+            user: user
+        };
+
+        ejs.renderFile(path.join(__dirname, '..', 'views','userviews', 'invoice.ejs'), data, (err, html) =>  {
+            if (err) {
+                console.error('Error rendering EJS file:', err);
+                return res.status(500).send('Internal Server Error');
+            }
+
+            const options = {
+                format: 'Letter'
+            };
+
+            pdf.create(html, options).toStream((err, stream) => {
+                if (err) {
+                    console.error('Error converting HTML to PDF:', err);
+                    return res.status(500).send('Internal Server Error');
+                }
+
+                const fileName = `invoice_${orderId}.pdf`;
+                res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
+                res.setHeader('Content-type', 'application/pdf');
+
+                stream.pipe(res);
+            });
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+},
+
 
 }
+
 
 
 
