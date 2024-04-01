@@ -70,6 +70,9 @@ router.post('/save-category-offer',categoryoffercontroller.savecategoryoffer)
 router.post('/update-category-offer',categoryoffercontroller.updatecategoryoffer)
 
 
+//sales report
+router.get('/generatesalesreport',admincontroller.generatesalesreport)
+router.get('/generatepdf',admincontroller.generatepdf)
 
 
 module.exports = router

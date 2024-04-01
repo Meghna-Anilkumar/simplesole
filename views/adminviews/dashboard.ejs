@@ -1,13 +1,160 @@
-<%-include('./sidebar')%>
+<%- include('./sidebar') %>
 
-  <div class="content">
+<style>
+  .dashboard-card i {
+    font-size: 48px; 
+    margin-bottom: 10px;
+  }
 
-    <h2>Welcome to the Admin Dashboard</h2>
+  .dashboard-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between; /* Adjust as needed */
+  }
 
+  .dashboard-card {
+    flex: 1;
+    margin: 15px;
+    padding: 20px;
+    width: calc(33.33% - 30px); /* Adjust width as needed */
+    max-width: 300px; /* Adjust max-width as needed */
+    box-sizing: border-box;
+    text-align: center;
+  }
+</style>
+
+<div class="content">
+  <h2>Welcome to the Admin Dashboard</h2>
+
+  <div class="dashboard-container">
+    <div class="dashboard-card">
+      <i class="fas fa-shopping-cart"></i>
+      <h2>Total Orders</h2>
+      <p><%= totalOrders %></p>
+    </div>
+
+    <div class="dashboard-card">
+      <i class="fas fa-box"></i>
+      <h2>Total Products Sold</h2>
+      <p><%= productQuantity %></p>
+    </div>
+
+    <div class="dashboard-card">
+      <i class="fas fa-users"></i>
+      <h2>Total Users</h2>
+      <p><%= totalUsers %></p>
+    </div>
   </div>
 
+  <h1>Sales Report</h1>
+  <form id="dateRangeForm">
+    <label for="fromDate">From Date:</label>
+    <input type="date" id="fromDate" name="fromDate">
+    <label for="toDate">To Date:</label>
+    <input type="date" id="toDate" name="toDate">
+    <!-- <label for="interval">Select Time Interval:</label> -->
+    <select id="interval" name="interval">
+      <option value="daily">Daily</option>
+      <option value="monthly">Monthly</option>
+      <option value="yearly">Yearly</option>
+    </select>
+    <button type="submit">Generate Report</button>
+    <button type="button" onclick="generatePDF()">Generate PDF</button>
+  </form>
+  
+  <div>
+    <canvas id="salesChart" width="800" height="400"></canvas>
+  </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  </html>
+<script>
+  const form = document.getElementById('dateRangeForm');
+  const salesChart = document.getElementById('salesChart').getContext('2d');
+  let currentChart;
+
+  form.addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    const fromDate = document.getElementById('fromDate').value;
+    const toDate = document.getElementById('toDate').value;
+    const interval = document.getElementById('interval').value;
+
+    const response = await fetch(`/generatesalesreport?fromDate=${fromDate}&toDate=${toDate}&interval=${interval}`);
+    const data = await response.json();
+
+    const labels = Object.keys(data);
+    const values = Object.values(data);
+
+    if (currentChart) {
+      currentChart.destroy(); // Destroy previous chart instance
+    }
+
+    currentChart = new Chart(salesChart, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Sales',
+          data: values,
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  });
+
+</script>
+
+<script>
+  // Function to handle generating and downloading the PDF
+  async function generatePDF() {
+    try {
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+      const interval = document.getElementById('interval').value;
+
+      // Send a request to the server to generate the PDF
+      const response = await fetch(`/generatepdf?fromDate=${fromDate}&toDate=${toDate}&interval=${interval}`);
+      
+      // Check if the request was successful (status code 200)
+      if (response.ok) {
+        // Extract the blob (PDF) from the response
+        const blob = await response.blob();
+
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a link element and set its attributes for downloading the PDF
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'sales_report.pdf';
+
+        // Append the link to the body and programmatically trigger the download
+        document.body.appendChild(a);
+        a.click();
+
+        // Remove the link from the body
+        document.body.removeChild(a);
+      } else {
+        // If the request failed, display an error message
+        console.error('Failed to generate PDF');
+      }
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  }
+
+  // Event listener for the "Generate PDF" button
+  document.getElementById('generatePDFButton').addEventListener('click', generatePDF);
+</script>
+
