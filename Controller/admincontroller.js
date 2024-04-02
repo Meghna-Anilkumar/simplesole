@@ -32,7 +32,29 @@ module.exports = {
       req.body.password == credential.password
     ) {
       req.session.isadminlogged = true
-      res.render('adminviews/dashboard', { title: 'Admin Dashboard' });
+      const totalUsers = await User.countDocuments();
+      const totalOrders = await Order.countDocuments()
+      const totalProductQuantity = await Order.aggregate([
+        {
+          $unwind: "$items",
+        },
+        {
+          $group: {
+            _id: null,
+            totalProductQuantity: { $sum: "$items.quantity" },
+          },
+        },
+      ]).exec();
+      const productQuantity =
+        totalProductQuantity.length > 0
+          ? totalProductQuantity[0].totalProductQuantity
+          : 0;
+          res.render('adminviews/dashboard', {
+            title: 'Dashboard',
+            totalOrders: totalOrders,
+            productQuantity: productQuantity,
+            totalUsers: totalUsers,
+          });
     }
     else {
       res.status(401).json({ message: 'Invalid credentials' });
@@ -40,34 +62,33 @@ module.exports = {
   },
 
   //get dashboard
-  dashboard: async (req, res) => {
-    const totalUsers = await User.countDocuments();
-    const totalOrders = await Order.countDocuments()
-    const totalProductQuantity = await Order.aggregate([
-      {
-        $unwind: "$items",
-      },
-      {
-        $group: {
-          _id: null,
-          totalProductQuantity: { $sum: "$items.quantity" },
-        },
-      },
-    ]).exec();
-    const productQuantity =
-      totalProductQuantity.length > 0
-        ? totalProductQuantity[0].totalProductQuantity
-        : 0;
-
-    res.render('adminviews/dashboard', {
-      title: 'Dashboard',
-      totalOrders: totalOrders,
-      productQuantity: productQuantity,
-      totalUsers: totalUsers,
-      
+dashboard: async (req, res) => {
+  const totalUsers = await User.countDocuments();
+  const totalOrders = await Order.countDocuments()
+  const totalProductQuantity = await Order.aggregate([
+    {
+      $unwind: "$items",
     },
-    )
-  },
+    {
+      $group: {
+        _id: null,
+        totalProductQuantity: { $sum: "$items.quantity" },
+      },
+    },
+  ]).exec();
+  const productQuantity =
+    totalProductQuantity.length > 0
+      ? totalProductQuantity[0].totalProductQuantity
+      : 0;
+
+  res.render('adminviews/dashboard', {
+    title: 'Dashboard',
+    totalOrders: totalOrders,
+    productQuantity: productQuantity,
+    totalUsers: totalUsers,
+  });
+},
+
 
   //admin logout
   adminlogout: async (req, res) => {
@@ -115,7 +136,6 @@ generatesalesreport:  async (req, res) => {
         salesData[yearMonth] += order.totalAmount;
       });
 
-      // Fill in missing months with zero sales
       const firstOrderDate = orders.length > 0 ? orders[0].orderdate : new Date();
       const lastOrderDate = orders.length > 0 ? orders[orders.length - 1].orderdate : new Date();
 
@@ -149,15 +169,12 @@ generatesalesreport:  async (req, res) => {
 //generate sales report pdf
 generatepdf:async (req, res) => {
   try {
-      // Retrieve the fromDate, toDate, and interval from the request query parameters
       const { fromDate, toDate, interval } = req.query;
 
-      // Assuming you have a function to fetch orders based on the fromDate and toDate
       const orders = await Order.find({ orderdate: { $gte: fromDate, $lte: toDate } })
       .populate('user')
       .populate('items.product');
 
-      // Render the sales report template with the orders, startDate, and endDate
       ejs.renderFile(
           path.join(__dirname, '..', 'views', 'adminviews', 'salesreport.ejs'),
           { orders, startDate: fromDate, endDate: toDate },
@@ -171,25 +188,23 @@ generatepdf:async (req, res) => {
                   format: 'Letter'
               };
 
-              // Generate the PDF from the HTML content
               pdf.create(html, options).toStream((err, stream) => {
                   if (err) {
                       console.error('Error converting HTML to PDF:', err);
                       return res.status(500).send('Internal Server Error');
                   }
 
-                  // Set the response headers for PDF download
+                 
                   const fileName = `sales_report_${fromDate}_${toDate}.pdf`;
                   res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
                   res.setHeader('Content-type', 'application/pdf');
 
-                  // Pipe the PDF stream to the response
                   stream.pipe(res);
               });
           }
       );
   } catch (error) {
-      console.error(error);
+      console.error(error)
       res.status(500).send('Internal Server Error');
   }
 },

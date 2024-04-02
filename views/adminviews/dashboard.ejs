@@ -9,15 +9,15 @@
   .dashboard-container {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between; /* Adjust as needed */
+    justify-content: space-between; 
   }
 
   .dashboard-card {
     flex: 1;
     margin: 15px;
     padding: 20px;
-    width: calc(33.33% - 30px); /* Adjust width as needed */
-    max-width: 300px; /* Adjust max-width as needed */
+    width: calc(33.33% - 30px); 
+    max-width: 300px; 
     box-sizing: border-box;
     text-align: center;
   }
@@ -88,7 +88,7 @@
     const values = Object.values(data);
 
     if (currentChart) {
-      currentChart.destroy(); // Destroy previous chart instance
+      currentChart.destroy(); 
     }
 
     currentChart = new Chart(salesChart, {
@@ -116,45 +116,39 @@
 </script>
 
 <script>
-  // Function to handle generating and downloading the PDF
+
   async function generatePDF() {
     try {
       const fromDate = document.getElementById('fromDate').value;
       const toDate = document.getElementById('toDate').value;
       const interval = document.getElementById('interval').value;
 
-      // Send a request to the server to generate the PDF
       const response = await fetch(`/generatepdf?fromDate=${fromDate}&toDate=${toDate}&interval=${interval}`);
       
-      // Check if the request was successful (status code 200)
       if (response.ok) {
-        // Extract the blob (PDF) from the response
+        
         const blob = await response.blob();
 
-        // Create a URL for the blob
+        
         const url = window.URL.createObjectURL(blob);
 
-        // Create a link element and set its attributes for downloading the PDF
+       
         const a = document.createElement('a');
         a.href = url;
         a.download = 'sales_report.pdf';
 
-        // Append the link to the body and programmatically trigger the download
         document.body.appendChild(a);
         a.click();
 
-        // Remove the link from the body
         document.body.removeChild(a);
       } else {
-        // If the request failed, display an error message
+        
         console.error('Failed to generate PDF');
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
     }
   }
-
-  // Event listener for the "Generate PDF" button
   document.getElementById('generatePDFButton').addEventListener('click', generatePDF);
 </script>
 

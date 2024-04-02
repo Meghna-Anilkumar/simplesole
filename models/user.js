@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcrypt')
+const {generateReferralCode}=require('../utils/referralcode')
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -16,11 +17,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    // confirmPassword: {
-    //     type: String,
-    //     required: true,
 
-    // },
     blocked: {
         type: Boolean,
         default: false
@@ -29,7 +26,13 @@ const userSchema = new mongoose.Schema({
     usedCoupons: {
         type: Array,
         default: []
-    }
+    },
+
+    // referralCode: {
+    //     type: String,
+    //     unique: true,
+    //     default: generateReferralCode,
+    // },
 })
 
 userSchema.pre('save', async function (next) {

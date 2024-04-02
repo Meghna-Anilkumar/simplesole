@@ -14,8 +14,9 @@ module.exports = {
     try {
 
       const category = await Category.find().exec();
-      const newArrivals = await Product.find({ dateCreated: { $gte: new Date(new Date() - 7 * 24 * 60 * 60 * 1000) } })
-            .sort({ dateCreated: -1 });
+      const newArrivals = await Product.find()
+      .sort({ dateCreated: -1 })
+      .limit(4);
 
       res.render('userviews/home', {
         title: 'Home',
