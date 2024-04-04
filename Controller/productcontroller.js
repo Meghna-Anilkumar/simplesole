@@ -4,6 +4,7 @@ const multer = require('multer')
 const fs = require('fs')
 const categorycontroller = require('../Controller/categorycontroller');
 const Wishlist = require('../models/wishlist')
+const ProductOffer = require('../models/productoffermodel')
 
 module.exports = {
 
@@ -203,6 +204,13 @@ module.exports = {
       const products = await Product.find();
       const selectedCategory = product.category;
 
+      const productOffers = await ProductOffer.find({
+        product: productId,
+        startDate: { $lte: new Date() },
+        expiryDate: { $gte: new Date() }
+      });
+
+
       res.render('userviews/productdetails', {
         title: 'Products in category',
         category: selectedCategory,
@@ -210,6 +218,7 @@ module.exports = {
         products: products,
         product: product,
         productInWishlist: productInWishlist, 
+        productOffers: productOffers
       });
     } catch (error) {
       console.error(error);
@@ -246,6 +255,11 @@ module.exports = {
       let allProducts = await Product.find();
       const category = await Category.find().exec();
 
+      const productOffers = await ProductOffer.find({
+        startDate: { $lte: new Date() },
+        expiryDate: { $gte: new Date() }
+      }).populate('product').exec();
+
       if (req.query.query) {
         const searchQuery = req.query.query;
         const regex = new RegExp(searchQuery, 'i');
@@ -264,6 +278,7 @@ module.exports = {
         title: 'All Products',
         allProducts: allProducts,
         category: category,
+        productOffers: productOffers
       });
     } catch (error) {
       console.error(error);

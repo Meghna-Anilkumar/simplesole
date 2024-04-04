@@ -55,21 +55,33 @@
       <div id="products">
         <div class="row mx-0">
           <% allProducts.filter(product => !product.category.blocked && !product.blocked).forEach(product => { %>
-            <div class="col-lg-3 col-md-6">
-              <div class="card d-flex flex-column align-items-center">
-                <div class="product-name"><%= product.name %></div>
-                <a href="/products/<%= product._id %>">
-                <div class="card-img"> 
-                  <img src="/<%= product.images[0] %>" alt="<%= product.name %>">
-                </div>
-              </a>
-                <div class="card-body pt-5">
-                  <div class="d-flex align-items-center price">
-                    <div class="font-weight-bold">₹<%= product.price %></div>
+            <% allProducts.forEach(product => { %>
+              <div class="col-lg-3 col-md-6">
+                  <div class="card d-flex flex-column align-items-center">
+                      <div class="product-name"><%= product.name %></div>
+                      <a href="/products/<%= product._id %>">
+                          <div class="card-img"> 
+                              <img src="/<%= product.images[0] %>" alt="<%= product.name %>">
+                          </div>
+                      </a>
+                      <div class="card-body pt-5">
+                          <% const offer = productOffers.find(offer => offer.product._id.toString() === product._id.toString()); %>
+                          <% if (offer) { %>
+                              <div class="d-flex align-items-center price">
+                                  <div class="font-weight-bold">Price: <s>₹<%= product.price %></s></div>
+                                  <div class="font-weight-bold ml-2"> ₹<%= offer.newPrice %></div>
+                              </div>
+                          <% } else { %>
+                              <div class="d-flex align-items-center price">
+                                  <div class="font-weight-bold">Price: ₹<%= product.price %></div>
+                              </div>
+                          <% } %>
+                      </div>
                   </div>
-                </div>
               </div>
-            </div>
+          <% }) %>
+          
+          
           <% }) %>
         </div>
       </div>

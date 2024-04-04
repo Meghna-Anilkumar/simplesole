@@ -178,9 +178,16 @@ a:hover{
                                 <span id="<%= item.product._id %>" class="quantity" max="<%= item.product.stock %>" ><%= item.quantity %></span>
                                 <button type="button" class="quantity-button" onclick="updateQuantity('<%= item.product._id %>', 1)">+</button>
                             </div>
-                            <div class="col" id="<%= item.product._id %>">&#8377;<%= item.product.price * item.quantity %>
+                            <div class="col" id="<%= item.product._id %>">
+                                <% const offer = productOffers.find(offer => offer.product.toString() === item.product._id.toString()); %>
+                                <% if (offer) { %>
+                                    &#8377;<%= offer.newPrice * item.quantity %>
+                                <% } else { %>
+                                    &#8377;<%= item.product.price * item.quantity %>
+                                <% } %>
                                 <button type="button" style="margin-left: 50px;" onclick="removeItem('<%= item.product._id %>')">X</button>
                             </div>
+                            
                         </div>
                     </div>
                 <% }); %>

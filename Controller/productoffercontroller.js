@@ -5,7 +5,7 @@ const isAuth = require('../middlewares/isAuth')
 const Product = require('../models/product')
 const Order = require('../models/orderSchema')
 const User = require('../models/user')
-const ProductOffer = require('../models/productoffermodel');
+const ProductOffer = require('../models/productoffermodel')
 
 
 module.exports = {
@@ -27,11 +27,18 @@ module.exports = {
     saveProductOffer: async (req, res) => {
         try {
             const { productId, discountPercentage, startDate, expiryDate } = req.body;
+
+            const product = await Product.findById(productId);
+
+            const discountAmount = (product.price * discountPercentage) / 100;
+            const newPrice = product.price - discountAmount;
+
             const productOffer = new ProductOffer({
                 product: productId,
                 discountPercentage,
                 startDate,
                 expiryDate,
+                newPrice,
             });
 
             await productOffer.save()
@@ -63,11 +70,17 @@ module.exports = {
         try {
             const { offerId, productId, discountPercentage, startDate, expiryDate } = req.body;
             
+            const product = await Product.findById(productId);
+            const discountAmount = (product.price * discountPercentage) / 100;
+            const newPrice = product.price - discountAmount;
+    
+
             const updatedOffer = await ProductOffer.findByIdAndUpdate(offerId, {
                 product: productId,
                 discountPercentage,
                 startDate,
                 expiryDate,
+                newPrice,
             }, { new: true });
     
             res.redirect('/productoffer');

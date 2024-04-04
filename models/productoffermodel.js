@@ -18,6 +18,10 @@ const productOfferSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
+    newPrice: { // New field to store the discounted price
+        type: Number,
+        required: true,
+    }
 });
 
 const ProductOffer = mongoose.model('ProductOffer', productOfferSchema);
