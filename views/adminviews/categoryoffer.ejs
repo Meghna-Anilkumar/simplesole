@@ -72,6 +72,9 @@
       <p>Discount Percentage: <%= categoryOffer.discountPercentage %>%</p>
       <p>Start Date: <%= categoryOffer.startDate %></p>
       <p>Expiry Date: <%= categoryOffer.expiryDate %></p>
+      <% if (categoryOffer.categoryofferprice) { %>
+        <p>Category Offer Price: <%= categoryOffer.categoryofferprice %></p>
+      <% } %>
       <button class="btn btn-primary edit-category-offer-btn" data-bs-toggle="modal" data-bs-target="#editCategoryOfferModal"
       data-category-offer-id="<%= categoryOffer._id %>" data-category-id="<%= categoryOffer.category._id %>"
       data-discount-percentage="<%= categoryOffer.discountPercentage %>" data-start-date="<%= categoryOffer.startDate %>"
@@ -80,6 +83,7 @@
     </div>
   <% }) %>
 </div>
+
 
 <!-- Edit Category Offer Modal -->
 <div class="modal fade" id="editCategoryOfferModal" tabindex="-1" aria-labelledby="editCategoryOfferModalLabel"

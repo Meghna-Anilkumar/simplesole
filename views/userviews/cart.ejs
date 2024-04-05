@@ -179,10 +179,15 @@ a:hover{
                                 <button type="button" class="quantity-button" onclick="updateQuantity('<%= item.product._id %>', 1)">+</button>
                             </div>
                             <div class="col" id="<%= item.product._id %>">
-                                <% const offer = productOffers.find(offer => offer.product.toString() === item.product._id.toString()); %>
-                                <% if (offer) { %>
-                                    &#8377;<%= offer.newPrice * item.quantity %>
+                                <% const productOffer = productOffers.find(offer => offer.product.toString() === item.product._id.toString()); %>
+                                <% if (productOffer) { %>
+                                    <!-- Show the new price if a product offer is available -->
+                                    &#8377;<%= productOffer.newPrice * item.quantity %>
+                                <% } else if (item.product.categoryofferprice && item.product.categoryofferprice < item.product.price) { %>
+                                    <!-- Show the category offer price if available and less than the original price -->
+                                    &#8377;<%= item.product.categoryofferprice * item.quantity %>
                                 <% } else { %>
+                                    <!-- Show the original price if no offers are available -->
                                     &#8377;<%= item.product.price * item.quantity %>
                                 <% } %>
                                 <button type="button" style="margin-left: 50px;" onclick="removeItem('<%= item.product._id %>')">X</button>

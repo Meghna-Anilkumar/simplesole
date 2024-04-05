@@ -18,8 +18,12 @@ const categoryofferSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  newPrice: {
+    type: Number,
+    required: true,
+  }
 });
 
-const CategoryOffer = mongoose.model('Offer', categoryofferSchema);
+const CategoryOffer = mongoose.model('CategoryOffer', categoryofferSchema);
 
 module.exports = CategoryOffer;

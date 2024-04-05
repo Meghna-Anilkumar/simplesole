@@ -6,21 +6,31 @@ const Product = require('../models/product')
 const Order = require('../models/orderSchema')
 const User = require('../models/user')
 const ProductOffer = require('../models/productoffermodel')
+const CategoryOffer = require('../models/categoryoffer')
 
 
 module.exports = {
 
-    // Get product offer page
-    getproductofferpage: async (req, res) => {
-        try {
-            const products = await Product.find({}, 'name').lean();
-            const offers = await ProductOffer.find().populate('product')
-            res.render('adminviews/productoffer', { title: 'Product offer', products, offers }); 
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Internal Server Error' });
-        }
-    },
+// Get product offer page
+getproductofferpage: async (req, res) => {
+    try {
+        
+        const products = await Product.find({}, 'name category').populate('category').lean();
+   
+        const categoriesWithOffers = await CategoryOffer.find({}, 'category');
+        
+        const filteredProducts = products.filter(product => {
+            return !categoriesWithOffers.some(categoryOffer => product.category._id.equals(categoryOffer.category));
+        });
+        
+        const offers = await ProductOffer.find().populate('product');
+        
+        res.render('adminviews/productoffer', { title: 'Product offer', products: filteredProducts, offers: offers });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal Server Error' });
+    }
+},
 
 
     // Create new offer by admin
@@ -105,7 +115,8 @@ module.exports = {
             console.error('Error:', error);
             res.status(500).json({ message: 'Internal server error' });
           }
-    }
+    },
+    
     
 }
 

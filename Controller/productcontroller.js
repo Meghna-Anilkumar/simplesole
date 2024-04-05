@@ -5,6 +5,7 @@ const fs = require('fs')
 const categorycontroller = require('../Controller/categorycontroller');
 const Wishlist = require('../models/wishlist')
 const ProductOffer = require('../models/productoffermodel')
+const CategoryOffer = require('../models/categoryoffer')
 
 module.exports = {
 
@@ -167,12 +168,10 @@ module.exports = {
   getproductsCategorywise: async (req, res) => {
     try {
       const categoryId = req.params.categoryId;
-      console.log(categoryId)
       const selectedCategory = await Category.findById(categoryId);
-      console.log(selectedCategory)
       const products = await Product.find({ category: categoryId });
-      console.log(products)
-      res.render('userviews/viewproductsCategorywise', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products });
+      const categoryOffers = await CategoryOffer.find({ category: categoryId }); // Fetch category offers for the selected category
+      res.render('userviews/viewproductsCategorywise', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products, categoryOffers: categoryOffers }); // Pass categoryOffers to the EJS template
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
@@ -260,6 +259,11 @@ module.exports = {
         expiryDate: { $gte: new Date() }
       }).populate('product').exec();
 
+      const categoryOffers = await CategoryOffer.find({
+        startDate: { $lte: new Date() },
+        expiryDate: { $gte: new Date() }
+      }).populate('category').exec();
+
       if (req.query.query) {
         const searchQuery = req.query.query;
         const regex = new RegExp(searchQuery, 'i');
@@ -278,7 +282,8 @@ module.exports = {
         title: 'All Products',
         allProducts: allProducts,
         category: category,
-        productOffers: productOffers
+        productOffers: productOffers,
+        categoryOffers: categoryOffers
       });
     } catch (error) {
       console.error(error);

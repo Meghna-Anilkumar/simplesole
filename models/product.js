@@ -49,5 +49,11 @@ const productSchema = new mongoose.Schema({
         default: false
     },
 
+    categoryofferprice:{
+        type: Number,
+        default: 0,
+        required: true,
+    },
+
 })
 module.exports = mongoose.model('Product', productSchema)

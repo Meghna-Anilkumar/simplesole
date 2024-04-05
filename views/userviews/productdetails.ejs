@@ -255,6 +255,9 @@ img {
       <!-- You can include other offer details here -->
     </div>
   <% }); %>
+  <% } else if (product.categoryofferprice && product.categoryofferprice < product.price) { %>
+    <!-- If category offer price exists and it's less than original price, display it -->
+    <h4 class="price">Price: <span style="text-decoration: line-through;">&#8377;<%= product.price %></span> &#8377;<%= product.categoryofferprice %></h4>
 <% } else { %>
   <!-- If no offer is available, display the original price -->
   <h4 class="price">Price: &#8377;<%= product.price %></h4>

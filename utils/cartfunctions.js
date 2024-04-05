@@ -1,4 +1,6 @@
-const calculateTotalPrice = async (items, productOffers) => {
+const Category = require('../models/category'); 
+
+const calculateTotalPrice = async (items, productOffers, categoryOffers) => {
     let total = 0;
     if (!items || !Array.isArray(items)) {
         console.error('Items array is undefined or not an array:', items);
@@ -6,36 +8,47 @@ const calculateTotalPrice = async (items, productOffers) => {
     }
 
     for (const item of items) {
-        console.log('item:', item); // Log the item to see its structure
+        console.log('item:', item);
 
-        // Check if item.product is defined
         if (item.product) {
-            // Check if productOffers is defined
-            if (!productOffers || !Array.isArray(productOffers)) {
-                console.error('Product offers array is undefined or not an array:', productOffers);
-                return total;
+            let itemPrice = item.product.price; 
+
+            if (productOffers && Array.isArray(productOffers)) {
+                // Fetch the offers for the current product
+                const productOffersFiltered = productOffers.filter(offer => offer.product.toString() === item.product._id.toString() &&
+                    new Date() >= offer.startDate && new Date() <= offer.expiryDate);
+
+                if (productOffersFiltered.length > 0) {
+                    const offer = productOffersFiltered[0]; // Assuming there's only one valid offer for simplicity
+                    itemPrice = offer.newPrice;
+                }
             }
 
-            // Fetch the offers for the current product
-            const offers = productOffers.filter(offer => offer.product.toString() === item.product._id.toString() &&
-                new Date() >= offer.startDate && new Date() <= offer.expiryDate);
+            // Check if categoryOffers is defined
+            if (categoryOffers && Array.isArray(categoryOffers)) {
+                // Fetch the offers for the category of the current product
+                const category = await Category.findById(item.product.category); // Assuming you have a Category model
+                if (category) {
+                    const categoryOffersFiltered = categoryOffers.filter(offer =>
+                        offer.category.toString() === category._id.toString() &&
+                        new Date() >= offer.startDate && new Date() <= offer.expiryDate);
 
-            console.log('offers:', offers); // Log the offers to see their structure
-
-            // If an offer exists and is valid, use the offer price, otherwise use the regular price
-            if (offers.length > 0) {
-                const offer = offers[0]; // Assuming there's only one valid offer for simplicity
-                total += offer.newPrice * item.quantity;
-            } else {
-                total += item.product.price * item.quantity;
+                    if (categoryOffersFiltered.length > 0) {
+                        const offer = categoryOffersFiltered[0]; // Assuming there's only one valid offer for simplicity
+                        itemPrice -= (itemPrice * offer.discountPercentage / 100);
+                    }
+                }
             }
+
+            total += itemPrice * item.quantity;
         } else {
             console.error('Product is undefined for item:', item);
         }
     }
 
     return Number(total.toFixed(2)); // Convert total to number and return
-};
+}
+
 
 module.exports = {
     calculateTotalPrice,

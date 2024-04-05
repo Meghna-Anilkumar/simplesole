@@ -4,8 +4,11 @@ const Category = require('../models/category');
 const Product = require('../models/product');
 const ProductOffer = require('../models/productoffermodel');
 const { calculateTotalPrice } = require('../utils/cartfunctions');
+const CategoryOffer = require('../models/categoryoffer'); 
+
 
 module.exports = {
+  
  // Get cart
  getcart: async (req, res) => {
   try {
@@ -18,7 +21,8 @@ module.exports = {
 
     const categories = await Category.find();
     const productOffers = await ProductOffer.find();
-    const totalPrice = await calculateTotalPrice(cart.items, productOffers);
+    const categoryOffers = await CategoryOffer.find(); // Fetch category offers
+    const totalPrice = await calculateTotalPrice(cart.items, productOffers, categoryOffers); // Pass categoryOffers to calculateTotalPrice
 
     if (isNaN(totalPrice)) {
       console.error('Total price is not a number:', totalPrice);
