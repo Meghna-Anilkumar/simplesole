@@ -4,13 +4,15 @@ const nodemailer = require('nodemailer')
 const otpGenerator = require('otp-generator')
 const bcrypt = require('bcrypt')
 const Category = require('../models/category')
+const { generateReferralCode } = require('../utils/generatereferral');
+const Wallet=require('../models/wallet')
 
 
 module.exports = {
 
   register: async (req, res) => {
     try {
-      const { name, email, password, confirmPassword } = req.body;
+      const { name, email, password, confirmPassword,referralCode } = req.body;
 
       const nameRegex = /^[A-Za-z]+$/;
 
@@ -48,6 +50,18 @@ module.exports = {
         title: 'Signup',
         category: categories,
       })
+    }
+
+    if (referralCode) {
+      const referredUser = await User.findOne({ referral: referralCode });
+      if (!referredUser) {
+        const categories = await Category.find();
+        return res.render('userviews/signup', {
+          error: 'Invalid referral code. Please enter a valid referral code or leave it empty.',
+          title: 'Signup',
+          category: categories,
+        });
+      }
     }
 
       console.log(email)
@@ -128,6 +142,9 @@ module.exports = {
 
       console.log(myotp)
       console.log(otpRecord.otp)
+
+      const referral= generateReferralCode();
+
       if (myotp == otpRecord.otp) {
 
         console.log('success otp')
@@ -139,9 +156,31 @@ module.exports = {
           otp: otpRecord.otp,
           expiresAt: otpRecord.expiresAt,
           blocked: otpRecord.blocked,
+          referral
         });
 
         await user.save();
+
+        if (referral) {
+          const referredUser = await User.findOne({ referral });
+          if (referredUser) {
+            const wallet = await Wallet.findOneAndUpdate(
+              { user: referredUser._id },
+              { $inc: { balance: 100 } }, // Increment balance by 100 Rs
+              { new: true }
+            );
+            // Handle if wallet doesn't exist
+            if (!wallet) {
+              // Create new wallet if not found
+              const newWallet = new Wallet({
+                user: referredUser._id,
+                balance: 100, // Credit 100 Rs
+              });
+              await newWallet.save();
+            }
+          }
+        }
+  
         req.session.isAuth = true
         req.session.user = user
         res.redirect('/');

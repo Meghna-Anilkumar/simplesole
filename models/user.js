@@ -28,11 +28,11 @@ const userSchema = new mongoose.Schema({
         default: []
     },
 
-    // referralCode: {
-    //     type: String,
-    //     unique: true,
-    //     default: generateReferralCode,
-    // },
+    referral: {
+        type: String,
+        unique: true,
+        default: generateReferralCode,
+    },
 })
 
 userSchema.pre('save', async function (next) {
