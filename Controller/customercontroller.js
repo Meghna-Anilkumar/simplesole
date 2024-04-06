@@ -51,12 +51,8 @@ module.exports = {
     }
 
       console.log(email)
-      const user = {
-        name,
-        email,
-        password,
-        confirmPassword,
-      }
+      
+      req.session.email=email;
 
       const otp = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
 
@@ -115,15 +111,14 @@ module.exports = {
   verifyotp: async (req, res) => {
     try {
 
-      const { email, otp } = req.body;
-      const a = otp[0]
-      const myotp = otp[1]
-      console.log(otp[0])
-      console.log(otp)
+      console.log('verifying jjjjjjjj')
 
+      const { otp: otpArray } = req.body; 
+      const [email, myotp] = otpArray;
+      
       console.log(email)
 
-      const otpRecord = await OTP.findOne({ email: a })
+      const otpRecord = await OTP.findOne({ email})
       console.log(otpRecord)
 
       if (!otpRecord || myotp !== otpRecord.otp) {
