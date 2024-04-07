@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const otpSchema = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        // required: true
     },
     email: {
         type: String,
@@ -20,7 +20,7 @@ const otpSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        // required: true,
         validate: {
             validator: (value) => {
                 // Password must contain at least one uppercase letter, one lowercase letter,
@@ -33,7 +33,7 @@ const otpSchema = new mongoose.Schema({
     },
     confirmPassword: {
         type: String,
-        required: true,
+        // required: true,
         validate: {
             validator: function (value) {
                 return this.password === value;
@@ -54,7 +54,7 @@ const otpSchema = new mongoose.Schema({
     expiresAt: {
         type: Date,
         default: Date.now,
-        expires: '1m',
+        expires: '60s',
     },
 
 })

@@ -36,9 +36,7 @@ const productSchema = new mongoose.Schema({
         type: String,
     },
     size: [{
-        type: String,
-        enum: [4, 5, 6, 7]
-
+        type: Number,
     }],
     dateCreated: {
         type: Date,

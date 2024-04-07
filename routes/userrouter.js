@@ -81,4 +81,10 @@ router.post('/applyCoupon',couponcontroller.applyCoupon)
 router.post('/removeCoupon',couponcontroller.removeCoupon)
 
 
+//forgot password
+router.get('/forgotpassword',usercontroller.verifyemail)
+router.post('/forgot-password',usercontroller.sendOTP)
+router.post('/reset-password',usercontroller.resetPassword)
+
+
 module.exports = router

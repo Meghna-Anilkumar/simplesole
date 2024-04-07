@@ -6,6 +6,10 @@ const session = require('express-session')
 const UserDetails = require('../models/userdetails')
 const bodyParser = require('body-parser')
 const Address = require('../models/address')
+const OTP = require('../models/otpSchema');
+const nodemailer = require('nodemailer');
+const otpGenerator = require('otp-generator');
+
 
 module.exports = {
 
@@ -87,7 +91,7 @@ module.exports = {
       const data = await UserDetails.findOne({ user: _id })
       const user = req.session.user
       if (req.session.isAuth) {
-        categories = await Category.find();
+        const categories = await Category.find();
         return res.render('userviews/profile', { message: { type: 'success', message: 'Profile details updated successfully' }, title: 'user profile', category: categories, data: data, user: user });
       } else {
         const categories = await Category.find();
@@ -256,7 +260,6 @@ module.exports = {
       }
 
       user.password = newPassword;
-      user.confirmPassword = newPassword;
 
       await user.save();
       req.session.user = user;
@@ -268,7 +271,92 @@ module.exports = {
     }
   },
 
+
+  //email page for forgot password
+  verifyemail:async(req,res)=>{
+    const category=await Category.find()
+    res.render('userviews/emailforgotpassword',{title:'Verify email',category,})
+  },
+
+
+  //send otp to verify email on forgot password
+  sendOTP: async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      const otp = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
+
+      const otpRecord = new OTP({
+        email: email,
+        otp: otp,
+        expiresAt: Date.now() + 60 * 1000, 
+      });
+      await otpRecord.save();
+
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.MAILID,
+          pass: process.env.PASSWORD,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your OTP for Forgot Password',
+        text: `Your OTP is ${otp}. It will expire in 30 seconds.`,
+      };
+
+      await transporter.sendMail(mailOptions);
+      req.session.email = email;
+      
+      console.log(otp)
+      const categories=await Category.find()
+      res.render('userviews/otp', { email, category: categories });
+      
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+    }
+  },
+
+
+  //reset password
+  resetPassword: async (req, res) => {
+    try {
+      const { newPassword, confirmPassword } = req.body;
+
+      console.log(req.body,'oooooooo')
+      const email = req.session.email;
   
+      if (newPassword !== confirmPassword) {
+        return res.status(400).json({ error: 'New password and confirm password do not match' });
+      }
+  
+      console.log('Email:', email);
+  
+      const existingUser = await User.findOne({ email });
+  
+      console.log('Existing user:', existingUser);
+  
+      if (!existingUser) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      // Update user's password in the database
+      existingUser.password = newPassword;
+      await existingUser.save();
+  
+      // Redirect or render success page after password reset
+      const categories = await Category.find();
+      return res.render('userviews/login', { title: 'Login', category: categories });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
 
 }
 

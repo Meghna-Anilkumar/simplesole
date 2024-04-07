@@ -67,6 +67,7 @@ module.exports = {
       console.log(email)
       
       req.session.email=email;
+      req.session.referralCode=referralCode
 
       const otp = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
 
@@ -76,7 +77,7 @@ module.exports = {
         otp: otp,
         password: req.body.password,
         confirmPassword: req.body.confirmPassword,
-        expiresAt: Date.now(),
+        // expiresAt: Date.now(),
         blocked: false,
       });
 
@@ -124,71 +125,66 @@ module.exports = {
 
   verifyotp: async (req, res) => {
     try {
-
-      console.log('verifying jjjjjjjj')
-
-      const { otp: otpArray } = req.body; 
+      const { otp: otpArray } = req.body;
       const [email, myotp] = otpArray;
-      
-      console.log(email)
 
-      const otpRecord = await OTP.findOne({ email})
-      console.log(otpRecord)
+      const referralCode=req.session.referralCode
+
+      const otpRecord = await OTP.findOne({ email });
 
       if (!otpRecord || myotp !== otpRecord.otp) {
-       const categories = await Category.find();
-       return res.render('userviews/otp',{error:'Invalid otp',category: categories,email})
+       
+        const categories = await Category.find();
+        return res.render('userviews/otp', { error: 'Invalid OTP', category: categories, email });
       }
 
-      console.log(myotp)
-      console.log(otpRecord.otp)
+      const existingUser = await User.findOne({ email });
 
-      const referral= generateReferralCode();
+      if (existingUser) {
+        const categories=await Category.find()
+        return res.render('userviews/resetpassword',{ title:'Reset password',email, category: categories })
+      }
 
-      if (myotp == otpRecord.otp) {
+      console.log('success otp');
+      const referral = generateReferralCode();
+      const user = new User({
+        name: otpRecord.name,
+        email: otpRecord.email,
+        password: otpRecord.password,
+        confirmPassword: otpRecord.confirmPassword,
+        otp: otpRecord.otp,
+        expiresAt: otpRecord.expiresAt,
+        blocked: otpRecord.blocked,
+        referral
+      });
+      await user.save();
 
-        console.log('success otp')
-        const user = new User({
-          name: otpRecord.name,
-          email: otpRecord.email,
-          password: otpRecord.password,
-          confirmPassword: otpRecord.confirmPassword,
-          otp: otpRecord.otp,
-          expiresAt: otpRecord.expiresAt,
-          blocked: otpRecord.blocked,
-          referral
-        });
-
-        await user.save();
-
-        if (referral) {
-          const referredUser = await User.findOne({ referral });
-          if (referredUser) {
-            const wallet = await Wallet.findOneAndUpdate(
-              { user: referredUser._id },
-              { $inc: { balance: 100 } }, // Increment balance by 100 Rs
-              { new: true }
-            );
-            // Handle if wallet doesn't exist
-            if (!wallet) {
-              // Create new wallet if not found
-              const newWallet = new Wallet({
-                user: referredUser._id,
-                balance: 100, // Credit 100 Rs
-              });
-              await newWallet.save();
-            }
+      if (referralCode) {
+        const referredUser = await User.findOne({ referral:referralCode });
+       
+        if (referredUser) {
+          let wallet = await Wallet.findOneAndUpdate(
+            { user: referredUser._id },
+            { $inc: { balance: 100 } }, 
+            { new: true }
+          );
+          if (!wallet) {
+            wallet = new Wallet({
+              user: referredUser._id,
+              balance: 100, 
+            });
+            await wallet.save();
           }
         }
-  
-        req.session.isAuth = true
-        req.session.user = user
-        res.redirect('/');
-
       }
+
+      req.session.isAuth = true;
+      req.session.user = user;
+
+      res.redirect('/');
     } catch (error) {
-      console.error(error)
-      res.json({ message: error.message, type: 'danger' })
+      console.error(error);
+      res.json({ message: error.message, type: 'danger' });
     }
   },
 
@@ -227,6 +223,56 @@ module.exports = {
       res.status(500).send('Internal Server Error')
     }
   },
+
+  //resend otp
+  resendOTP: async (req, res) => {
+    try {
+      const { email } = req.session;
+  
+      // Find the existing OTP record for the email
+      let otpRecord = await OTP.findOne({ email });
+  
+      if (!otpRecord) {
+        // If OTP record doesn't exist, return an error
+        return res.status(404).json({ error: 'OTP record not found' });
+      }
+  
+      // Generate a new OTP
+      const newOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
+  
+      // Update the existing OTP record with the new OTP and reset the expiration time
+      otpRecord.otp = newOTP;
+      otpRecord.expiresAt = new Date(Date.now() + 60 * 1000); // Reset expiration time to 60 seconds from now
+      await otpRecord.save();
+  
+      // Send the new OTP via email
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.MAILID,
+          pass: process.env.PASSWORD,
+        },
+      });
+  
+      const mailOptions = {
+        from: process.env.MAILID,
+        to: email,
+        subject: 'Your New OTP for Signup',
+        text: `Your new OTP is ${newOTP}. It will expire in 60 seconds.`,
+      };
+  
+      await transporter.sendMail(mailOptions);
+
+      console.log('new otp:',newOTP)
+      const categories=await Category.find()
+      res.render('userviews/otp', { email, category: categories })
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
+
 
 
 }

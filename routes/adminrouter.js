@@ -74,5 +74,8 @@ router.post('/update-category-offer',categoryoffercontroller.updatecategoryoffer
 router.get('/generatesalesreport',admincontroller.generatesalesreport)
 router.get('/generatepdf',admincontroller.generatepdf)
 
+//resend otp
+router.get('/resend-otp',customercontroller.resendOTP)
+
 
 module.exports = router
