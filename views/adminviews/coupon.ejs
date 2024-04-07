@@ -54,26 +54,31 @@
         </div>
     </div>
 
+    <% function formatDate(dateString) {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    } %>
+    
     <div id="couponDetails" class="coupon-container">
-        <% coupons.forEach(coupon=> { %>
+        <% coupons.forEach(coupon => { %>
         <div class="coupon-box">
-            <p>Coupon Code: <%= coupon.couponCode %>
-            </p>
+            <p>Coupon Code: <%= coupon.couponCode %></p>
             <p>Discount Rate: <%= coupon.discountRate %>%</p>
-            <p>Minimum Purchase Amount: <%= coupon.minimumPurchaseAmount %>
-            </p>
-            <p>Expiry Date: <%= coupon.expiryDate %>
-            </p>
+            <p>Minimum Purchase Amount: <%= coupon.minimumPurchaseAmount %></p>
+            <p>Expiry Date: <%= formatDate(coupon.expiryDate) %></p>
             <button class="btn btn-primary edit-coupon-btn" data-toggle="modal" data-target="#editCouponModal"
                 data-coupon-id="<%= coupon._id %>" data-coupon-code="<%= coupon.couponCode %>"
                 data-discount-rate="<%= coupon.discountRate %>"
                 data-min-purchase-amount="<%= coupon.minimumPurchaseAmount %>"
                 data-expiry-date="<%= coupon.expiryDate %>">Edit</button>
-                <button class="btn btn-danger delete-coupon-btn" data-coupon-id="<%= coupon._id %>">Delete</button>
+            <button class="btn btn-danger delete-coupon-btn" data-coupon-id="<%= coupon._id %>">Delete</button>
         </div>
         <% }) %>
-    </div>
-</div>
+    </div>    
+    
 
 <div class="content">
     <!-- Edit Coupon Modal -->
@@ -103,8 +108,9 @@
                         </div>
                         <div class="form-group">
                             <label for="editExpiryDate">Expiry Date</label>
-                            <input type="date" class="form-control" id="editExpiryDate" name="editExpiryDate" required>
+                            <input type="text" class="form-control" id="editExpiryDate" name="editExpiryDate" required readonly>
                         </div>
+                        
                         <button type="submit" class="btn btn-primary">Update Coupon</button>
                     </form>
                 </div>
@@ -127,7 +133,14 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
     <script>
-        // Populate edit coupon modal fields when edit button is clicked
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+    
         document.querySelectorAll('.edit-coupon-btn').forEach(function (button) {
             button.addEventListener('click', function () {
                 const couponId = button.dataset.couponId;
@@ -141,13 +154,14 @@
                 document.querySelector('#editCouponCode').value = couponCode;
                 document.querySelector('#editDiscountRate').value = discountRate;
                 document.querySelector('#editMinPurchaseAmount').value = minPurchaseAmount;
-                document.querySelector('#editExpiryDate').value = expiryDate;
+                document.querySelector('#editExpiryDate').value = formatDate(expiryDate);
     
                 // Show the edit modal
                 $('#editCouponModal').modal('show');
             });
         });
     </script>
+    
 
 <script>
     document.querySelectorAll('.delete-coupon-btn').forEach(function (button) {

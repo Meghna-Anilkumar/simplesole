@@ -3,14 +3,15 @@ const express = require('express')
 const app = express()
 app.use(bodyParser.json())
 const Order = require('../models/orderSchema')
-const User=require('../models/user')
+const User = require('../models/user')
 const Product = require('../models/product')
 const Address = require('../models/address')
-const ejs=require('ejs')
+const ejs = require('ejs')
 const path = require('path');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const pdf = require('html-pdf');
+const Category = require('../models/category')
 
 module.exports = {
 
@@ -49,12 +50,12 @@ module.exports = {
         totalProductQuantity.length > 0
           ? totalProductQuantity[0].totalProductQuantity
           : 0;
-          res.render('adminviews/dashboard', {
-            title: 'Dashboard',
-            totalOrders: totalOrders,
-            productQuantity: productQuantity,
-            totalUsers: totalUsers,
-          });
+      res.render('adminviews/dashboard', {
+        title: 'Dashboard',
+        totalOrders: totalOrders,
+        productQuantity: productQuantity,
+        totalUsers: totalUsers,
+      });
     }
     else {
       res.status(401).json({ message: 'Invalid credentials' });
@@ -62,32 +63,57 @@ module.exports = {
   },
 
   //get dashboard
-dashboard: async (req, res) => {
-  const totalUsers = await User.countDocuments();
-  const totalOrders = await Order.countDocuments()
-  const totalProductQuantity = await Order.aggregate([
-    {
-      $unwind: "$items",
-    },
-    {
-      $group: {
-        _id: null,
-        totalProductQuantity: { $sum: "$items.quantity" },
+  dashboard: async (req, res) => {
+    const totalUsers = await User.countDocuments();
+    const totalOrders = await Order.countDocuments()
+    const totalProductQuantity = await Order.aggregate([
+      {
+        $unwind: "$items",
       },
-    },
-  ]).exec();
-  const productQuantity =
-    totalProductQuantity.length > 0
-      ? totalProductQuantity[0].totalProductQuantity
-      : 0;
+      {
+        $group: {
+          _id: null,
+          totalProductQuantity: { $sum: "$items.quantity" },
+        },
+      },
+    ]).exec();
+    const productQuantity =
+      totalProductQuantity.length > 0
+        ? totalProductQuantity[0].totalProductQuantity
+        : 0;
 
-  res.render('adminviews/dashboard', {
-    title: 'Dashboard',
-    totalOrders: totalOrders,
-    productQuantity: productQuantity,
-    totalUsers: totalUsers,
-  });
-},
+    const topSellingProducts = await Order.aggregate([
+      { $unwind: '$items' },
+      { $group: { _id: '$items.product', sales: { $sum: '$items.quantity' } } },
+      { $sort: { sales: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'product' } },
+      { $unwind: '$product' },
+      { $project: { name: '$product.name', sales: 1 } }
+    ]);
+
+    const topSellingCategories = await Order.aggregate([
+      { $unwind: '$items' },
+      { $lookup: { from: 'products', localField: 'items.product', foreignField: '_id', as: 'product' } },
+      { $unwind: '$product' },
+      { $group: { _id: '$product.category', sales: { $sum: '$items.quantity' } } },
+      { $sort: { sales: -1 } },
+      { $limit: 5 },
+      { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'category' } },
+      { $unwind: '$category' },
+      { $project: { name: '$category.name', sales: 1 } }
+    ]);
+
+
+    res.render('adminviews/dashboard', {
+      title: 'Dashboard',
+      totalOrders: totalOrders,
+      productQuantity: productQuantity,
+      totalUsers: totalUsers,
+      topSellingProducts: topSellingProducts,
+      topSellingCategories: topSellingCategories
+    });
+  },
 
 
   //admin logout
@@ -97,116 +123,116 @@ dashboard: async (req, res) => {
     req.session.isadminlogged = false
 
     req.session.destroy(err => {
-        if (err) {
-            console.error('Error destroying session:', err);
-            res.status(500).send('Internal Server Error');
-        } else {
-            res.redirect('/adminlogin')
-        }
-    })
-},
-
-
-//generate sales report
-generatesalesreport:  async (req, res) => {
-  const { fromDate, toDate, interval } = req.query;
-  let query = {};
-
-  if (fromDate && toDate) {
-    query.orderdate = { $gte: new Date(fromDate), $lte: new Date(toDate) };
-  }
-
-  const orders = await Order.find(query);
-
-  let salesData = {};
-
-  switch (interval) {
-    case 'daily':
-      orders.forEach(order => {
-        const date = order.orderdate.toISOString().split('T')[0];
-        if (!salesData[date]) salesData[date] = 0;
-        salesData[date] += order.totalAmount;
-      });
-      break;
-
-    case 'monthly':
-      orders.forEach(order => {
-        const yearMonth = order.orderdate.toISOString().slice(0, 7);
-        if (!salesData[yearMonth]) salesData[yearMonth] = 0;
-        salesData[yearMonth] += order.totalAmount;
-      });
-
-      const firstOrderDate = orders.length > 0 ? orders[0].orderdate : new Date();
-      const lastOrderDate = orders.length > 0 ? orders[orders.length - 1].orderdate : new Date();
-
-      const startDate = new Date(firstOrderDate.getFullYear(), firstOrderDate.getMonth(), 1);
-      const endDate = new Date(lastOrderDate.getFullYear(), lastOrderDate.getMonth() + 1, 0);
-
-      const currentDate = new Date(startDate);
-      while (currentDate <= endDate) {
-        const yearMonth = currentDate.toISOString().slice(0, 7);
-        if (!salesData[yearMonth]) salesData[yearMonth] = 0;
-        currentDate.setMonth(currentDate.getMonth() + 1);
+      if (err) {
+        console.error('Error destroying session:', err);
+        res.status(500).send('Internal Server Error');
+      } else {
+        res.redirect('/adminlogin')
       }
-      break;
-
-    case 'yearly':
-      orders.forEach(order => {
-        const year = order.orderdate.getFullYear().toString();
-        if (!salesData[year]) salesData[year] = 0;
-        salesData[year] += order.totalAmount;
-      });
-      break;
-
-    default:
-      return res.status(400).json({ error: 'Invalid interval' });
-  }
-
-  res.json(salesData);
-},
+    })
+  },
 
 
-//generate sales report pdf
-generatepdf:async (req, res) => {
-  try {
+  //generate sales report
+  generatesalesreport: async (req, res) => {
+    const { fromDate, toDate, interval } = req.query;
+    let query = {};
+
+    if (fromDate && toDate) {
+      query.orderdate = { $gte: new Date(fromDate), $lte: new Date(toDate) };
+    }
+
+    const orders = await Order.find(query);
+
+    let salesData = {};
+
+    switch (interval) {
+      case 'daily':
+        orders.forEach(order => {
+          const date = order.orderdate.toISOString().split('T')[0];
+          if (!salesData[date]) salesData[date] = 0;
+          salesData[date] += order.totalAmount;
+        });
+        break;
+
+      case 'monthly':
+        orders.forEach(order => {
+          const yearMonth = order.orderdate.toISOString().slice(0, 7);
+          if (!salesData[yearMonth]) salesData[yearMonth] = 0;
+          salesData[yearMonth] += order.totalAmount;
+        });
+
+        const firstOrderDate = orders.length > 0 ? orders[0].orderdate : new Date();
+        const lastOrderDate = orders.length > 0 ? orders[orders.length - 1].orderdate : new Date();
+
+        const startDate = new Date(firstOrderDate.getFullYear(), firstOrderDate.getMonth(), 1);
+        const endDate = new Date(lastOrderDate.getFullYear(), lastOrderDate.getMonth() + 1, 0);
+
+        const currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+          const yearMonth = currentDate.toISOString().slice(0, 7);
+          if (!salesData[yearMonth]) salesData[yearMonth] = 0;
+          currentDate.setMonth(currentDate.getMonth() + 1);
+        }
+        break;
+
+      case 'yearly':
+        orders.forEach(order => {
+          const year = order.orderdate.getFullYear().toString();
+          if (!salesData[year]) salesData[year] = 0;
+          salesData[year] += order.totalAmount;
+        });
+        break;
+
+      default:
+        return res.status(400).json({ error: 'Invalid interval' });
+    }
+
+    res.json(salesData);
+  },
+
+
+  //generate sales report pdf
+  generatepdf: async (req, res) => {
+    try {
       const { fromDate, toDate, interval } = req.query;
 
       const orders = await Order.find({ orderdate: { $gte: fromDate, $lte: toDate } })
-      .populate('user')
-      .populate('items.product');
+        .populate('user')
+        .populate('items.product');
 
       ejs.renderFile(
-          path.join(__dirname, '..', 'views', 'adminviews', 'salesreport.ejs'),
-          { orders, startDate: fromDate, endDate: toDate },
-          (err, html) => {
-              if (err) {
-                  console.error('Error rendering EJS file:', err);
-                  return res.status(500).send('Internal Server Error');
-              }
-
-              const options = {
-                  format: 'Letter'
-              };
-
-              pdf.create(html, options).toStream((err, stream) => {
-                  if (err) {
-                      console.error('Error converting HTML to PDF:', err);
-                      return res.status(500).send('Internal Server Error');
-                  }
-
-                 
-                  const fileName = `sales_report_${fromDate}_${toDate}.pdf`;
-                  res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
-                  res.setHeader('Content-type', 'application/pdf');
-
-                  stream.pipe(res);
-              });
+        path.join(__dirname, '..', 'views', 'adminviews', 'salesreport.ejs'),
+        { orders, startDate: fromDate, endDate: toDate },
+        (err, html) => {
+          if (err) {
+            console.error('Error rendering EJS file:', err);
+            return res.status(500).send('Internal Server Error');
           }
+
+          const options = {
+            format: 'Letter'
+          };
+
+          pdf.create(html, options).toStream((err, stream) => {
+            if (err) {
+              console.error('Error converting HTML to PDF:', err);
+              return res.status(500).send('Internal Server Error');
+            }
+
+
+            const fileName = `sales_report_${fromDate}_${toDate}.pdf`;
+            res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
+            res.setHeader('Content-type', 'application/pdf');
+
+            stream.pipe(res);
+          });
+        }
       );
-  } catch (error) {
+    } catch (error) {
       console.error(error)
       res.status(500).send('Internal Server Error');
-  }
-},
+    }
+  },
 
 }

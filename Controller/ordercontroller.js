@@ -19,8 +19,6 @@ const ejs = require('ejs');
 // const puppeteer = require('puppeteer');
 
 
-
-
 //Razorpay instance
 const instance = new Razorpay({
   key_id: process.env.key_id,

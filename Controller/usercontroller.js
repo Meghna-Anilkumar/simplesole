@@ -305,7 +305,7 @@ module.exports = {
         from: process.env.EMAIL_USER,
         to: email,
         subject: 'Your OTP for Forgot Password',
-        text: `Your OTP is ${otp}. It will expire in 30 seconds.`,
+        text: `Your OTP is ${otp}. It will expire in 60 seconds.`,
       };
 
       await transporter.sendMail(mailOptions);

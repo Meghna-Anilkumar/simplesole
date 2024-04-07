@@ -8,8 +8,14 @@ module.exports = {
 
   orderspage: async (req, res) => {
     try {
-      const orders = await Order.find();
-      res.render('adminviews/orders', { title: 'Orders', orders });
+      const pageSize = 10; // Define the page size here
+      let currentPage = parseInt(req.query.page) || 1; // Get current page from query parameters, default to 1
+      const totalOrdersCount = await Order.countDocuments();
+      const totalPages = Math.ceil(totalOrdersCount / pageSize);
+      currentPage = Math.min(Math.max(currentPage, 1), totalPages); // Ensure currentPage is within valid range
+      const skip = (currentPage - 1) * pageSize;
+      const orders = await Order.find().sort({ orderdate: -1 }).limit(pageSize).skip(skip);
+      res.render('adminviews/orders', { title: 'Orders', orders, pageSize, currentPage, totalPages });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
@@ -41,5 +47,9 @@ module.exports = {
     }
 
   },
+
+
+
+
 
 }

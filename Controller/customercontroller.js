@@ -67,6 +67,8 @@ module.exports = {
       console.log(email)
       
       req.session.email=email;
+      req.session.name=name;
+      req.session.password=password;
       req.session.referralCode=referralCode
 
       const otp = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
@@ -77,7 +79,7 @@ module.exports = {
         otp: otp,
         password: req.body.password,
         confirmPassword: req.body.confirmPassword,
-        // expiresAt: Date.now(),
+        expiresAt: 60,
         blocked: false,
       });
 
@@ -135,7 +137,7 @@ module.exports = {
       if (!otpRecord || myotp !== otpRecord.otp) {
        
         const categories = await Category.find();
-        return res.render('userviews/otp', { error: 'Invalid OTP', category: categories, email });
+        res.render('userviews/otp', { email, category: categories });
       }
 
       const existingUser = await User.findOne({ email });
@@ -227,51 +229,55 @@ module.exports = {
   //resend otp
   resendOTP: async (req, res) => {
     try {
-      const { email } = req.session;
-  
-      // Find the existing OTP record for the email
-      let otpRecord = await OTP.findOne({ email });
-  
-      if (!otpRecord) {
-        // If OTP record doesn't exist, return an error
-        return res.status(404).json({ error: 'OTP record not found' });
-      }
-  
-      // Generate a new OTP
-      const newOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
-  
-      // Update the existing OTP record with the new OTP and reset the expiration time
-      otpRecord.otp = newOTP;
-      otpRecord.expiresAt = new Date(Date.now() + 60 * 1000); // Reset expiration time to 60 seconds from now
-      await otpRecord.save();
-  
-      // Send the new OTP via email
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.MAILID,
-          pass: process.env.PASSWORD,
-        },
-      });
-  
-      const mailOptions = {
-        from: process.env.MAILID,
-        to: email,
-        subject: 'Your New OTP for Signup',
-        text: `Your new OTP is ${newOTP}. It will expire in 60 seconds.`,
-      };
-  
-      await transporter.sendMail(mailOptions);
+        const { name, email, password } = req.session;
 
-      console.log('new otp:',newOTP)
-      const categories=await Category.find()
-      res.render('userviews/otp', { email, category: categories })
+        let otpRecord = await OTP.findOne({ email });
+
+        if (!otpRecord) {
+            const newOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
+
+            otpRecord = new OTP({
+                name: name,
+                email: email,
+                password: password,
+                otp: newOTP,
+                expiresAt: new Date(Date.now() + 60 * 1000) 
+            });
+
+            await otpRecord.save();
+        } else {
+            const newOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false, digits: true });
+
+            otpRecord.otp = newOTP;
+            otpRecord.expiresAt = new Date(Date.now() + 60 * 1000); 
+            await otpRecord.save();
+        }
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.MAILID,
+                pass: process.env.PASSWORD,
+            },
+        });
+
+        const mailOptions = {
+            from: process.env.MAILID,
+            to: email,
+            subject: 'Your New OTP for Signup',
+            text: `Your new OTP is ${otpRecord.otp}. It will expire in 60 seconds.`,
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        console.log('New OTP:', otpRecord.otp);
+        const categories = await Category.find();
+        res.render('userviews/otp', { email, category: categories });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
-  },
-
+},
 
 
 

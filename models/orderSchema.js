@@ -73,7 +73,25 @@ const orderSchema = new mongoose.Schema({
             return this.orderStatus === 'DELIVERED';
         }
     },
+    orderId: {
+        type: String,
+        unique: true,
+    },
 
+})
+
+orderSchema.pre('save', async function (next) {
+    try {
+        // Generate a random number between 10000 and 99999
+        const randomNumber = Math.floor(Math.random() * 90000) + 10000;
+
+        // Create the order ID with the '#' symbol and the random number
+        this.orderId = `#${randomNumber}`;
+
+        next();
+    } catch (error) {
+        next(error);
+    }
 })
 
 const Order = mongoose.model('Order', orderSchema);

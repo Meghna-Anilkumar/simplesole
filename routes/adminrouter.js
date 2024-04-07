@@ -78,4 +78,7 @@ router.get('/generatepdf',admincontroller.generatepdf)
 router.get('/resend-otp',customercontroller.resendOTP)
 
 
+
+
+
 module.exports = router
