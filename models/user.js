@@ -33,17 +33,21 @@ const userSchema = new mongoose.Schema({
         unique: true,
         default: generateReferralCode,
     },
+    userId: {
+        type: String,
+        unique: true,
+    },
 })
 
 userSchema.pre('save', async function (next) {
     try {
         if (!this.isBlocked) {
-            // const saltRounds = 10;
-            // const salt = await bcrypt.genSalt(saltRounds);
             const hashedPassword = await bcrypt.hash(this.password, 10);
             this.password = hashedPassword;
-            // this.confirmPassword = hashedPassword
         }
+
+        const randomNumber = Math.floor(Math.random() * 90000) + 10000;
+        this.userId = `user#${randomNumber}`;
         next();
     } catch (error) {
         next(error);

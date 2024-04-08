@@ -21,7 +21,9 @@ const categoryofferSchema = new mongoose.Schema({
   newPrice: {
     type: Number,
     required: true,
-  }
+  },
+
+
 });
 
 const CategoryOffer = mongoose.model('CategoryOffer', categoryofferSchema);

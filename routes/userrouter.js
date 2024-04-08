@@ -86,5 +86,7 @@ router.get('/forgotpassword',usercontroller.verifyemail)
 router.post('/forgot-password',usercontroller.sendOTP)
 router.post('/reset-password',usercontroller.resetPassword)
 
+//filteredproducts
+router.get('/filteredProducts',productcontroller.filterproducts)
 
 module.exports = router

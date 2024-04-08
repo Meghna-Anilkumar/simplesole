@@ -410,4 +410,12 @@ img {
 
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/0.8.3/medium-zoom.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const images = document.querySelectorAll('.zoomable-image');
+    mediumZoom(images);
+  });
+</script>
+
 <%-include('./footer')%>

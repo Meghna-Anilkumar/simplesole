@@ -77,6 +77,11 @@ const orderSchema = new mongoose.Schema({
         type: String,
         unique: true,
     },
+   
+    discountAmount:{
+        type: Number,
+        default:0
+     }
 
 })
 
@@ -86,11 +91,11 @@ orderSchema.pre('save', async function (next) {
         const randomNumber = Math.floor(Math.random() * 90000) + 10000;
 
         // Create the order ID with the '#' symbol and the random number
-        this.orderId = `#${randomNumber}`;
+        this.orderId = `#${randomNumber}`
 
-        next();
+        next()
     } catch (error) {
-        next(error);
+        next(error)
     }
 })
 

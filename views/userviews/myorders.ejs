@@ -57,9 +57,9 @@
                         <div class="col-md-2 text-center d-flex justify-content-center align-items-center">
                           <p class="text-muted mb-0 small">Qty: <%= item.quantity %></p>
                         </div>
-                        <div class="col-md-2 text-center d-flex justify-content-center align-items-center">
+                        <!-- <div class="col-md-2 text-center d-flex justify-content-center align-items-center">
                           <p class="text-muted mb-0 small">&#8377;<%= item.product.price * item.quantity %></p>
-                        </div>
+                        </div> -->
                         <div class="col-md-4 text-right">
                           <% if (order.orderStatus !== 'CANCELLED' && order.items.length > 1) { %>
                             <% if (item.itemstatus !== 'CANCELLED' && order.orderStatus !== 'DELIVERED') { %>

@@ -419,6 +419,23 @@
   .coupon p {
     margin: 5px 0;
   }
+  .payment__type.disabled label {
+    color: #999; /* Change label color */
+    cursor: not-allowed; /* Change cursor */
+  }
+
+  /* Optional: Style for enabled payment options */
+  .payment__type label {
+    color: #333; /* Default label color */
+    cursor: pointer; /* Default cursor */
+  }
+
+  /* Style for error message */
+  .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+  }
   </style>
 
   <div class="container">
@@ -512,11 +529,14 @@
         <div class="payment__title">
           Select Payment Method
         </div>
-
+      
         <div class="payment__types">
-          <div class="payment__type payment__type--cc active">
-            <input type="radio" name="paymentMethod" id="paymentCC" value="CASH_ON_DELIVERY">
+          <div class="payment__type payment__type--cc active <% if (cart.total > 1000) { %> disabled <% } %>">
+            <input type="radio" name="paymentMethod" id="paymentCC" value="CASH_ON_DELIVERY" <% if (cart.total > 1000) { %> disabled <% } %>>
             <label for="paymentCC"><i class="icon icon-credit-card"></i>CASH ON DELIVERY</label>
+            <% if (cart.total > 1000) { %>
+              <div class="error-message">COD not available for orders above 1000</div>
+            <% } %>
           </div>
           <div class="payment__type payment__type--paypal">
             <input type="radio" name="paymentMethod" id="paymentWallet" value="WALLET">
@@ -528,7 +548,7 @@
           </div>
         </div>
         <br>
-
+      
         <button type="submit" class="button-base-button" id="placeorderButton">Place your Order
           <i class="icon icon-arrow-right-circle"></i>
         </button>

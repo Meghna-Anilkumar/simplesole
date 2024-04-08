@@ -111,6 +111,8 @@ applyCoupon: async (req, res) => {
         cart.newTotal = newTotal;
         await cart.save() 
 
+        req.session.couponCode=couponCode
+
         return res.json({ success: true, newTotal: newTotal, coupon: coupon });
     } catch (error) {
         console.error(error);
@@ -137,6 +139,8 @@ removeCoupon: async (req, res) => {
             await user.save();
 
             return res.json({ success: true, newTotal: cart.newTotal });
+
+            req.session.couponCode=null
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Internal server error' });

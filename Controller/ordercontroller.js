@@ -147,6 +147,9 @@ module.exports = {
           })
 
           await newOrder.save()
+          cart.items = []
+          cart.total = 0
+          await cart.save()
 
           await Cart.findOneAndDelete({ user: user });
           console.log('rendering successpage.........')

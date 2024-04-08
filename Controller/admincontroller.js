@@ -50,11 +50,36 @@ module.exports = {
         totalProductQuantity.length > 0
           ? totalProductQuantity[0].totalProductQuantity
           : 0;
+
+          const topSellingProducts = await Order.aggregate([
+            { $unwind: '$items' },
+            { $group: { _id: '$items.product', sales: { $sum: '$items.quantity' } } },
+            { $sort: { sales: -1 } },
+            { $limit: 5 },
+            { $lookup: { from: 'products', localField: '_id', foreignField: '_id', as: 'product' } },
+            { $unwind: '$product' },
+            { $project: { name: '$product.name', sales: 1 } }
+          ]);
+      
+          const topSellingCategories = await Order.aggregate([
+            { $unwind: '$items' },
+            { $lookup: { from: 'products', localField: 'items.product', foreignField: '_id', as: 'product' } },
+            { $unwind: '$product' },
+            { $group: { _id: '$product.category', sales: { $sum: '$items.quantity' } } },
+            { $sort: { sales: -1 } },
+            { $limit: 5 },
+            { $lookup: { from: 'categories', localField: '_id', foreignField: '_id', as: 'category' } },
+            { $unwind: '$category' },
+            { $project: { name: '$category.name', sales: 1 } }
+          ]);
+      
       res.render('adminviews/dashboard', {
         title: 'Dashboard',
         totalOrders: totalOrders,
         productQuantity: productQuantity,
         totalUsers: totalUsers,
+        topSellingProducts: topSellingProducts,
+      topSellingCategories: topSellingCategories
       });
     }
     else {
@@ -196,35 +221,50 @@ module.exports = {
   generatepdf: async (req, res) => {
     try {
       const { fromDate, toDate, interval } = req.query;
-
+  
+      // Find orders within the specified date range and populate related fields
       const orders = await Order.find({ orderdate: { $gte: fromDate, $lte: toDate } })
         .populate('user')
         .populate('items.product');
-
+  
+      // Calculate overall sales count and overall order amount
+      const overallSalesCount = orders.length;
+      const overallOrderAmount = orders.reduce((total, order) => total + order.totalAmount, 0);
+  
+      // Render the HTML template with orders data and calculated values
       ejs.renderFile(
         path.join(__dirname, '..', 'views', 'adminviews', 'salesreport.ejs'),
-        { orders, startDate: fromDate, endDate: toDate },
+        { 
+          orders, 
+          startDate: fromDate, 
+          endDate: toDate, 
+          overallSalesCount, 
+          overallOrderAmount 
+        },
         (err, html) => {
           if (err) {
             console.error('Error rendering EJS file:', err);
             return res.status(500).send('Internal Server Error');
           }
-
+  
+          // Set PDF options
           const options = {
             format: 'Letter'
           };
-
+  
+          // Generate PDF from HTML
           pdf.create(html, options).toStream((err, stream) => {
             if (err) {
               console.error('Error converting HTML to PDF:', err);
               return res.status(500).send('Internal Server Error');
             }
-
-
+  
+            // Set response headers for PDF download
             const fileName = `sales_report_${fromDate}_${toDate}.pdf`;
             res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
             res.setHeader('Content-type', 'application/pdf');
-
+  
+            // Pipe the PDF stream to the response
             stream.pipe(res);
           });
         }
@@ -235,4 +275,5 @@ module.exports = {
     }
   },
 
+  
 }

@@ -311,7 +311,30 @@ module.exports = {
       console.error(error);
       res.status(500).send('Internal Server Error');
     }
-  }
+  },
+
+  //filter products
+  filterproducts:async (req, res) => {
+    try {
+      let filteredProducts = await Product.find();
+  
+      // Apply color filter if provided
+      if (req.query.color) {
+        filteredProducts = filteredProducts.filter(product => product.color === req.query.color);
+      }
+  
+      // Apply size filter if provided
+      if (req.query.size) {
+        filteredProducts = filteredProducts.filter(product => product.size.includes(req.query.size));
+      }
+  
+      // Return filtered products
+      res.json(filteredProducts);
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+    }
+  },
 
 
 };

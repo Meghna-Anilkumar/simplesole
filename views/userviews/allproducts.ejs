@@ -636,12 +636,48 @@
       font-size: 14px;
       font-weight: bold;
     }
+
+    #productList {
+    display: flex;
+    flex-wrap: wrap; /* Allow products to wrap to the next line */
+    justify-content: space-between; /* Distribute space between products */
+  }
+
+  .card-img-top{
+    width: 100%; /* Calculate width to fit 4 cards per line */
+    margin-bottom: 20px;
+  }
+    
   </style>
+
   <br><br><br><br>
   <form action="/search" method="GET" class="search-form">
     <input type="text" name="query" placeholder="Search for products" style="margin-top: 20px; margin-left: 75px;">
     <button type="submit" class="css-huh2rh">Search</button>
   </form>
+  
+  <select id="colorFilter">
+    <option value="">All Colors</option>
+    <option value="red">black</option>
+    <option value="blue">brown</option>
+    <option value="white">white</option>
+    <option value="lilac">lilac</option>
+
+    <!-- Add more color options as needed -->
+  </select>
+  
+  <select id="sizeFilter">
+    <option value="">All Sizes</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <!-- Add more size options as needed -->
+  </select>
+
+  <div id="productList">
+    <!-- Product cards will be dynamically inserted here -->
+  </div>
+
   <form action="/seeallproducts" method="GET" id="sortForm">
     <div class="container">
       <div class="row">
@@ -728,3 +764,73 @@
     });
 
   </script>
+<script>
+  // Function to fetch all products and update product listing
+  function fetchAllProducts() {
+    // Send AJAX request to backend route for all products
+    fetch(`/allProducts`)
+      .then(response => response.json())
+      .then(data => {
+        // Update product listing with all products
+        updateProductList(data);
+      })
+      .catch(error => console.error('Error fetching all products:', error));
+  }
+
+  // Function to fetch filtered products and update product listing
+  function fetchFilteredProducts(colorFilter, sizeFilter) {
+    // Send AJAX request to backend route for filtered products
+    fetch(`/filteredProducts?color=${colorFilter}&size=${sizeFilter}`)
+      .then(response => response.json())
+      .then(data => {
+        // Update product listing with filtered products
+        updateProductList(data);
+      })
+      .catch(error => console.error('Error fetching filtered products:', error));
+  }
+
+  // Function to update product listing based on data
+  function updateProductList(products) {
+    const productList = document.getElementById('products');
+    productList.innerHTML = ''; // Clear existing products
+
+    products.forEach(product => {
+      // Create product card HTML
+      const imageURL = `/${product.images[0]}`;
+      const productCard = `
+      <div class="col-lg-3 col-md-6">
+              <div class="card d-flex flex-column align-items-center">
+                <div class="product-name">${product.name}</div>
+                <div class="price">Price: $${product.price}</div>
+                <div class="image"> <img src="${imageURL}" class="card-img-top" alt="${product.name}"></div>
+                <!-- Add more product details as needed -->
+              </div>
+            </div>`;
+      productList.insertAdjacentHTML('beforeend', productCard); // Append product card
+    });
+  }
+
+  // Event listeners for filter options
+  document.getElementById('colorFilter').addEventListener('change', function() {
+    const colorFilter = this.value;
+    const sizeFilter = document.getElementById('sizeFilter').value;
+    if (colorFilter || sizeFilter) {
+      fetchFilteredProducts(colorFilter, sizeFilter);
+    } else {
+      fetchAllProducts();
+    }
+  });
+
+  document.getElementById('sizeFilter').addEventListener('change', function() {
+    const sizeFilter = this.value;
+    const colorFilter = document.getElementById('colorFilter').value;
+    if (colorFilter || sizeFilter) {
+      fetchFilteredProducts(colorFilter, sizeFilter);
+    } else {
+      fetchAllProducts();
+    }
+  });
+
+  // Initial fetch for all products (without filters)
+  fetchAllProducts();
+</script>

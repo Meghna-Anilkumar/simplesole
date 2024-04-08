@@ -14,7 +14,7 @@ module.exports = {
       const totalPages = Math.ceil(totalOrdersCount / pageSize);
       currentPage = Math.min(Math.max(currentPage, 1), totalPages); // Ensure currentPage is within valid range
       const skip = (currentPage - 1) * pageSize;
-      const orders = await Order.find().sort({ orderdate: -1 }).limit(pageSize).skip(skip);
+      const orders = await Order.find().populate('user', 'userId').sort({ orderdate: -1 }).limit(pageSize).skip(skip);
       res.render('adminviews/orders', { title: 'Orders', orders, pageSize, currentPage, totalPages });
     } catch (error) {
       console.error(error);
