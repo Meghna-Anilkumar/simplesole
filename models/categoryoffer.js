@@ -18,10 +18,10 @@ const categoryofferSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  newPrice: {
-    type: Number,
-    required: true,
-  },
+  // newPrice: {
+  //   type: Number,
+  //   // required: true,
+  // },
 
 
 });

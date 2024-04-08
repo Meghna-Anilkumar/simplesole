@@ -198,48 +198,103 @@
 
 </script>
 
+
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const updateCategoryOfferBtn = document.getElementById('updateCategoryOfferBtn');
-  
-      updateCategoryOfferBtn.addEventListener('click', async function () {
-        const editCategoryOfferId = document.getElementById('editCategoryOfferId').value;
-        const editCategoryDropdown = document.getElementById('editCategoryDropdown');
-        const editDiscountPercentage = document.getElementById('editDiscountPercentage');
-        const editStartDate = document.getElementById('editStartDate');
-        const editExpiryDate = document.getElementById('editExpiryDate');
-  
-        const formData = {
-          offerId: editCategoryOfferId,
-          categoryId: editCategoryDropdown.value,
-          discountPercentage: editDiscountPercentage.value,
-          startDate: editStartDate.value,
-          expiryDate: editExpiryDate.value
-        };
-  
+  document.addEventListener('DOMContentLoaded', function () {
+    const editCategoryOfferBtns = document.querySelectorAll('.edit-category-offer-btn');
+
+    editCategoryOfferBtns.forEach(editCategoryOfferBtn => {
+      editCategoryOfferBtn.addEventListener('click', function (event) {
+        event.preventDefault();
+
+        const categoryOfferId = this.getAttribute('data-category-offer-id');
+        const categoryId = this.getAttribute('data-category-id');
+        const discountPercentage = this.getAttribute('data-discount-percentage');
+        const startDate = this.getAttribute('data-start-date');
+        const expiryDate = this.getAttribute('data-expiry-date');
+
+        // Populate the edit modal fields with the current data
+        document.getElementById('editCategoryOfferId').value = categoryOfferId;
+        // Select the correct category in the dropdown
+        document.getElementById('editCategoryDropdown').value = categoryId;
+        document.getElementById('editDiscountPercentage').value = discountPercentage;
+        document.getElementById('editStartDate').value = startDate;
+        document.getElementById('editExpiryDate').value = expiryDate;
+
+        const editCategoryOfferModal = new bootstrap.Modal(document.getElementById('editCategoryOfferModal'));
+        editCategoryOfferModal.show();
+      });
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const updateCategoryOfferBtn = document.getElementById('updateCategoryOfferBtn');
+
+    updateCategoryOfferBtn.addEventListener('click', async function () {
+      const editCategoryOfferId = document.getElementById('editCategoryOfferId').value;
+      const editCategoryDropdown = document.getElementById('editCategoryDropdown');
+      const editDiscountPercentage = document.getElementById('editDiscountPercentage');
+      const editStartDate = document.getElementById('editStartDate');
+      const editExpiryDate = document.getElementById('editExpiryDate');
+
+      const formData = {
+        categoryId: editCategoryDropdown.value,
+        discountPercentage: editDiscountPercentage.value,
+        startDate: editStartDate.value,
+        expiryDate: editExpiryDate.value
+      };
+
+      try {
+        const response = await fetch(`/update-category-offer/${editCategoryOfferId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          console.log('Category offer updated successfully');
+          // Refresh the page or update the UI as needed
+          window.location.reload(); 
+        } else {
+          console.error('Failed to update category offer');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    });
+  });
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const deleteCategoryOfferBtns = document.querySelectorAll('.delete-category-offer-btn');
+
+    deleteCategoryOfferBtns.forEach(deleteCategoryOfferBtn => {
+      deleteCategoryOfferBtn.addEventListener('click', async function () {
+        const categoryOfferId = this.getAttribute('data-category-offer-id');
+
         try {
-          const response = await fetch('/update-category-offer', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
+          const response = await fetch(`/delete-category-offer/${categoryOfferId}`, {
+            method: 'DELETE'
           });
-  
+
           if (response.ok) {
-            const updatedCategoryOffer = await response.json();
-            console.log('Category offer updated successfully:', updatedCategoryOffer);
-  
-            const editCategoryOfferModal = new bootstrap.Modal(document.getElementById('editCategoryOfferModal'));
-            editCategoryOfferModal.hide();
+            console.log('Category offer deleted successfully');
+            // Refresh the page or update the UI as needed
+            window.location.reload(); 
           } else {
-            console.error('Failed to update category offer');
+            console.error('Failed to delete category offer');
           }
         } catch (error) {
           console.error('Error:', error);
         }
-        window.location.reload(); // Refresh the page to reflect changes (optional)
       });
     });
-  </script>
+  });
+</script>
+
   

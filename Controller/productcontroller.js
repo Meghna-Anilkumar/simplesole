@@ -170,8 +170,8 @@ module.exports = {
       const categoryId = req.params.categoryId;
       const selectedCategory = await Category.findById(categoryId);
       const products = await Product.find({ category: categoryId });
-      const categoryOffers = await CategoryOffer.find({ category: categoryId }); // Fetch category offers for the selected category
-      res.render('userviews/viewproductsCategorywise', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products, categoryOffers: categoryOffers }); // Pass categoryOffers to the EJS template
+      const categoryOffers = await CategoryOffer.find({ category: categoryId }); 
+      res.render('userviews/viewproductsCategorywise', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products, categoryOffers: categoryOffers }); 
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
@@ -314,27 +314,34 @@ module.exports = {
   },
 
   //filter products
-  filterproducts:async (req, res) => {
+  filterproducts: async (req, res) => {
     try {
-      let filteredProducts = await Product.find();
-  
-      // Apply color filter if provided
-      if (req.query.color) {
-        filteredProducts = filteredProducts.filter(product => product.color === req.query.color);
-      }
-  
-      // Apply size filter if provided
-      if (req.query.size) {
-        filteredProducts = filteredProducts.filter(product => product.size.includes(req.query.size));
-      }
-  
-      // Return filtered products
-      res.json(filteredProducts);
+        let filteredProducts = await Product.find();
+
+        // Apply color filter if provided
+        if (req.query.color) {
+            filteredProducts = filteredProducts.filter(product => product.color === req.query.color);
+        }
+
+        // Apply size filter if provided
+        if (req.query.size) {
+            filteredProducts = filteredProducts.filter(product => product.size.includes(req.query.size));
+        }
+
+        // Apply price range filter if provided
+        if (req.query.minPrice && req.query.maxPrice) {
+            const minPrice = parseFloat(req.query.minPrice);
+            const maxPrice = parseFloat(req.query.maxPrice);
+            filteredProducts = filteredProducts.filter(product => product.price >= minPrice && product.price <= maxPrice);
+        }
+
+        // Return filtered products
+        res.json(filteredProducts);
     } catch (error) {
-      console.error(error);
-      res.status(500).send('Internal Server Error');
+        console.error(error);
+        res.status(500).send('Internal Server Error');
     }
-  },
+},
 
 
 };

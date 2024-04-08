@@ -18,7 +18,7 @@ const productOfferSchema = new mongoose.Schema({
         type: Date,
         required: true,
     },
-    newPrice: { // New field to store the discounted price
+    newPrice: { 
         type: Number,
         required: true,
     }

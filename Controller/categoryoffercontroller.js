@@ -4,6 +4,8 @@ const Product = require('../models/product')
 const Order = require('../models/orderSchema')
 const User = require('../models/user')
 const CategoryOffer = require('../models/categoryoffer')
+const mongoose = require('mongoose');
+const {calculateCategoryOfferPrice}=require('../utils/categoryofferprice');
 
 
 module.exports = {
@@ -23,60 +25,98 @@ module.exports = {
 
 
     savecategoryoffer: async (req, res) => {
-      try {
-          const { categoryId, discountPercentage, startDate, expiryDate } = req.body;
-  
-          const categoryProducts = await Product.find({ category: categoryId });
-  
-          let totalProductPrice = 0;
-          categoryProducts.forEach(product => {
-              totalProductPrice += product.price;
-          });
-          const averageProductPrice = totalProductPrice / categoryProducts.length;
-  
-          const discountAmount = (averageProductPrice * discountPercentage) / 100;
-          const newPrice = averageProductPrice - discountAmount;
-  
-          const categoryOffer = new CategoryOffer({
-              category: categoryId,
-              discountPercentage,
-              startDate,
-              expiryDate,
-              newPrice,
-          });
-  
-          const savedCategoryOffer = await categoryOffer.save();
-  
-          res.status(200).json(savedCategoryOffer); 
-      } catch (error) {
-          console.error('Error saving category offer:', error);
-          res.status(500).json({ error: 'Failed to save category offer' });
-      } 
-  },
+        try {
+            const { categoryId, discountPercentage, startDate, expiryDate } = req.body;
+    
+            // Find all products of the specified category
+            const categoryProducts = await Product.find({ category: categoryId });
+    
+            // Iterate over each product and update its category offer price
+            for (const product of categoryProducts) {
+                // Calculate category offer price for each product
+                const categoryOfferPrice = calculateCategoryOfferPrice(product.price, discountPercentage);
+                // Update the product with the new category offer price
+                await Product.findByIdAndUpdate(product._id, { categoryofferprice: categoryOfferPrice });
+            }
+    
+            // Create and save the category offer
+            const categoryOffer = new CategoryOffer({
+                category: categoryId,
+                discountPercentage,
+                startDate,
+                expiryDate,
+            });
+            const savedCategoryOffer = await categoryOffer.save();
+    
+            res.status(200).json(savedCategoryOffer);
+        } catch (error) {
+            console.error('Error saving category offer:', error);
+            res.status(500).json({ error: 'Failed to save category offer' });
+        }
+    },
   
 
 
     //edit category offer
-    updatecategoryoffer:async(req,res)=>{
+    editcategoryoffer: async (req, res) => {
         try {
-            const { offerId, categoryId, discountPercentage, startDate, expiryDate } = req.body;
-        
-            const updatedCategoryOffer = await CategoryOffer.findByIdAndUpdate(offerId, {
-              category: categoryId,
-              discountPercentage: discountPercentage,
-              startDate: startDate,
-              expiryDate: expiryDate
-            }, { new: true });
-        
-            if (!updatedCategoryOffer) {
-              return res.status(404).json({ error: 'Category offer not found' });
+            const categoryId = req.body.categoryId;
+            const discountPercentage = req.body.discountPercentage;
+            const startDate = req.body.startDate;
+            const expiryDate = req.body.expiryDate;
+    
+            const categoryOfferId = req.params.id;
+    
+            // Find the category products to update categoryofferprice
+            const categoryProducts = await Product.find({ category: categoryId });
+    
+            // Update categoryofferprice for each product
+            for (const product of categoryProducts) {
+                const averageProductPrice = product.price;
+                const discountAmount = (averageProductPrice * discountPercentage) / 100;
+                const newPrice = averageProductPrice - discountAmount;
+    
+                // Update the categoryofferprice field for the product
+                await Product.findByIdAndUpdate(product._id, {
+                    categoryofferprice: newPrice
+                });
             }
-        
-            res.status(200).json(updatedCategoryOffer); 
-          } catch (error) {
+    
+            // Update the category offer details
+            const updatedCategoryOffer = await CategoryOffer.findByIdAndUpdate(categoryOfferId, {
+                category: categoryId,
+                discountPercentage: discountPercentage,
+                startDate: startDate,
+                expiryDate: expiryDate
+            }, { new: true });
+    
+            res.redirect('/categoryoffer');
+        } catch (error) {
             console.error('Error updating category offer:', error);
             res.status(500).json({ error: 'Failed to update category offer' });
+        }
+    },
+
+
+
+      //delete category offer
+      deletecategoryoffer:async (req, res) => {
+        const categoryOfferId = req.params.id;
+      
+        try {
+          const deletedCategoryOffer = await CategoryOffer.findByIdAndDelete(categoryOfferId);
+      
+          if (!deletedCategoryOffer) {
+            return res.status(404).json({ error: 'Category offer not found' });
           }
-    }
+      
+          res.status(200).json({ message: 'Category offer deleted successfully' });
+        } catch (error) {
+          console.error('Error deleting category offer:', error);
+          res.status(500).json({ error: 'Failed to delete category offer' });
+        }
+      },
+
+
 
 }
