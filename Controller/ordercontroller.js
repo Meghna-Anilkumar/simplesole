@@ -389,7 +389,6 @@ module.exports = {
   },
 
 
-  //download invoice
   downloadinvoice: async (req, res) => {
     try {
       const orderId = req.params.orderId;

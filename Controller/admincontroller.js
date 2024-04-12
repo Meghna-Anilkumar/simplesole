@@ -10,7 +10,7 @@ const ejs = require('ejs')
 const path = require('path');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
-const pdf = require('html-pdf');
+
 const Category = require('../models/category')
 
 module.exports = {
