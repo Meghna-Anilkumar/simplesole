@@ -113,6 +113,12 @@
 </div>
 </div>
 
+<div class="mt-3 text-center">
+    <p>You get ₹100 in your wallet when anyone signs up with your referral code.</p>
+    <p>Your Referral Code: <%= user ? (user.referral || '') : '' %></p>
+</div>
+
+
 <script>
     document.getElementById('editProfileForm').addEventListener('submit', async function (event) {
     event.preventDefault();

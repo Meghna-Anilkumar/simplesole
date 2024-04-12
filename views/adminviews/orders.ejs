@@ -68,7 +68,13 @@
         <tr>
           <td><%= (currentPage - 1) * pageSize + index + 1 %></td>
           <td><%= order.orderId %></td>
-          <td><%= order.user.userId %></td>
+          <td>
+            <% if (order.user) { %>
+              <%= order.user.userId %>
+            <% } else { %>
+              User Not Found
+            <% } %>
+          </td>
           <td><%= order.orderdate.toDateString() %></td>
           <td><%= order.paymentMethod %></td>
           <td><%= order.totalAmount %></td>

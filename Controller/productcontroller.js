@@ -251,45 +251,55 @@ module.exports = {
   //get all products page
   getAllProducts: async (req, res) => {
     try {
-      let allProducts = await Product.find();
-      const category = await Category.find().exec();
+        let allProducts;
+        const category = await Category.find().exec();
+        const productOffers = await ProductOffer.find({
+            startDate: { $lte: new Date() },
+            expiryDate: { $gte: new Date() }
+        }).populate('product').exec();
+        const categoryOffers = await CategoryOffer.find({
+            startDate: { $lte: new Date() },
+            expiryDate: { $gte: new Date() }
+        }).populate('category').exec();
 
-      const productOffers = await ProductOffer.find({
-        startDate: { $lte: new Date() },
-        expiryDate: { $gte: new Date() }
-      }).populate('product').exec();
+        if (req.query.query) {
+            const searchQuery = req.query.query;
+            const regex = new RegExp(searchQuery, 'i');
+            allProducts = await Product.find({ name: regex });
+        } else {
+            allProducts = await Product.find();
+        }
 
-      const categoryOffers = await CategoryOffer.find({
-        startDate: { $lte: new Date() },
-        expiryDate: { $gte: new Date() }
-      }).populate('category').exec();
+        if (req.query.sortOption === 'priceLowToHigh') {
+            allProducts.sort((a, b) => a.price - b.price);
+        } else if (req.query.sortOption === 'priceHighToLow') {
+            allProducts.sort((a, b) => b.price - a.price);
+        }
 
-      if (req.query.query) {
-        const searchQuery = req.query.query;
-        const regex = new RegExp(searchQuery, 'i');
-        allProducts = await Product.find({ name: regex });
-      } else {
-        allProducts = await Product.find();
-      }
+        const perPage = 12;
+        const page = parseInt(req.query.page) || 1; 
+        const totalProducts = allProducts.length; 
+        const totalPages = Math.ceil(totalProducts / perPage); 
+        
+        const skip = (page - 1) * perPage;
 
-      if (req.query.sortOption === 'priceLowToHigh') {
-        allProducts.sort((a, b) => a.price - b.price);
-      } else if (req.query.sortOption === 'priceHighToLow') {
-        allProducts.sort((a, b) => b.price - a.price);
-      }
+        allProducts = allProducts.slice(skip, skip + perPage);
 
-      res.render('userviews/allproducts', {
-        title: 'All Products',
-        allProducts: allProducts,
-        category: category,
-        productOffers: productOffers,
-        categoryOffers: categoryOffers
-      });
+        res.render('userviews/allproducts', {
+            title: 'All Products',
+            allProducts: allProducts,
+            category: category,
+            productOffers: productOffers,
+            categoryOffers: categoryOffers,
+            currentPage: page,
+            totalPages: totalPages
+        });
     } catch (error) {
-      console.error(error);
-      res.status(500).send('Internal Server Error');
+        console.error(error);
+        res.status(500).send('Internal Server Error');
     }
-  },
+},
+
 
   //search products
   searchproducts: async (req, res) => {
@@ -318,24 +328,20 @@ module.exports = {
     try {
         let filteredProducts = await Product.find();
 
-        // Apply color filter if provided
         if (req.query.color) {
             filteredProducts = filteredProducts.filter(product => product.color === req.query.color);
         }
 
-        // Apply size filter if provided
         if (req.query.size) {
             filteredProducts = filteredProducts.filter(product => product.size.includes(req.query.size));
         }
 
-        // Apply price range filter if provided
         if (req.query.minPrice && req.query.maxPrice) {
             const minPrice = parseFloat(req.query.minPrice);
             const maxPrice = parseFloat(req.query.maxPrice);
             filteredProducts = filteredProducts.filter(product => product.price >= minPrice && product.price <= maxPrice);
         }
 
-        // Return filtered products
         res.json(filteredProducts);
     } catch (error) {
         console.error(error);

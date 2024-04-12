@@ -73,79 +73,81 @@ module.exports = {
     },
 
 
-// Apply coupon
-applyCoupon: async (req, res) => {
-    try {
-        const { couponCode } = req.body;
-        const userId = req.session.user._id;
-        const user = await User.findById(userId);
+    // Apply coupon
+    applyCoupon: async (req, res) => {
+        try {
+            const { couponCode } = req.body;
+            const userId = req.session.user._id;
+            const user = await User.findById(userId);
 
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
+
+            const cart = await Cart.findOne({ user }).populate('items.product').exec()
+
+            if (!couponCode) {
+                return res.status(400).json({ error: 'Coupon code is required' })
+            }
+
+            const coupon = await Coupon.findOne({ couponCode });
+
+            if (!coupon) {
+                return res.status(400).json({ error: 'Invalid or expired coupon code' });
+            }
+
+            if (cart.total < coupon.minimumPurchaseAmount) {
+                return res.status(400).json({ error: 'Minimum purchase amount not met for this coupon' });
+            }
+
+            if (user.usedCoupons && user.usedCoupons.includes(coupon._id.toString())) {
+                return res.status(400).json({ error: 'You have already used this coupon.' })
+            }
+
+            console.log(coupon.discountRate, 'kkkkkkk')
+
+            const discount = (cart.total * coupon.discountRate) / 100;
+            const newTotal = cart.total - discount;
+            cart.newTotal = newTotal;
+            await cart.save()
+
+            req.session.couponCode = couponCode
+
+            return res.json({ success: true, newTotal: newTotal, coupon: coupon });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal server error' });
         }
-
-        const cart = await Cart.findOne({ user }).populate('items.product').exec()
-
-        if (!couponCode) {
-            return res.status(400).json({ error: 'Coupon code is required' })
-        }
-
-        const coupon = await Coupon.findOne({ couponCode });
-
-        if (!coupon) {
-            return res.status(400).json({ error: 'Invalid or expired coupon code' });
-        }
-
-        if (cart.total < coupon.minimumPurchaseAmount) {
-            return res.status(400).json({ error: 'Minimum purchase amount not met for this coupon' });
-        }
-
-        if (user.usedCoupons && user.usedCoupons.includes(coupon._id.toString())) {
-            return res.status(400).json({ error: 'You have already used this coupon.' })
-        }
-
-        console.log(coupon.discountRate,'kkkkkkk')
-
-        const discount = (cart.total * coupon.discountRate) / 100;
-        const newTotal = cart.total - discount;
-        cart.newTotal = newTotal;
-        await cart.save() 
-
-        req.session.couponCode=couponCode
-
-        return res.json({ success: true, newTotal: newTotal, coupon: coupon });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-},
+    },
 
 
-// Remove coupon
-removeCoupon: async (req, res) => {
-    try {
-        const userId = req.session.user._id;
-        const user = await User.findById(userId);
+    // Remove coupon
+    removeCoupon: async (req, res) => {
+        try {
+            const userId = req.session.user._id;
+            const user = await User.findById(userId);
 
-        if (!user) {
-            return res.status(404).json({ error: 'User not found' });
-        }
+            if (!user) {
+                return res.status(404).json({ error: 'User not found' });
+            }
 
-        const cart = await Cart.findOne({ user }).populate('items.product').exec();
+            const cart = await Cart.findOne({ user }).populate('items.product').exec();
 
             cart.newTotal = cart.total
             await cart.save();
 
             await user.save();
 
+            req.session.couponCode = ''
+
             return res.json({ success: true, newTotal: cart.newTotal });
 
-            req.session.couponCode=null
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal server error' });
-    }
-},
+
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ error: 'Internal server error' });
+        }
+    },
 
     //update coupon
     editCoupon: async (req, res) => {
