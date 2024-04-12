@@ -14,7 +14,6 @@ require('dotenv').config()
 const path = require('path');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
-const pdf = require('html-pdf');
 const ejs = require('ejs');
 // const puppeteer = require('puppeteer');
 
