@@ -4,6 +4,7 @@ const isAuth = require('../middlewares/isAuth')
 const Product = require('../models/product')
 const Order = require('../models/orderSchema')
 const Coupon = require('../models/coupon')
+const Wishlist = require('../models/wishlist')
 
 const { calculateTotalPrice } = require('../utils/cartfunctions')
 const Address = require('../models/address')
@@ -16,7 +17,8 @@ module.exports = {
         const categories = await Category.find();
         const addresses = await Address.find({ user: user });
         const cart = await Cart.findOne({ user }).populate('items.product').exec();
-        res.render('userviews/checkout', { title: 'checkout page', category: categories, cart, addresses: addresses ,order})
+        var wishlist = await Wishlist.findOne({ user });
+        res.render('userviews/checkout', { title: 'checkout page', category: categories, cart, addresses: addresses ,order,wishlist})
     },
 
 }

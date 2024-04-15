@@ -15,7 +15,9 @@ const path = require('path');
 const fs = require('fs');
 const PDFDocument = require('pdfkit');
 const ejs = require('ejs');
-// const puppeteer = require('puppeteer');
+const Wishlist = require('../models/wishlist')
+const puppeteer = require('puppeteer');
+
 
 
 //Razorpay instance
@@ -60,7 +62,6 @@ module.exports = {
         cart.items = [];
         cart.total = 0;
         await cart.save();
-
         return res.render('userviews/successpage');
       }
 
@@ -172,8 +173,10 @@ module.exports = {
       const orders = await Order.find({ user }).populate('items.product').exec();
 
       const categories = await Category.find();
+      const wishlist = await Wishlist.findOne({ user: user }).populate('items.product');
+      const cart = await Cart.findOne({ user: user }).populate('items.product').exec();
 
-      res.render('userviews/myorders', { title: 'My Orders', orders, category: categories });
+      res.render('userviews/myorders', { title: 'My Orders', orders, category: categories, wishlist, cart });
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Internal Server Error' });
@@ -189,17 +192,19 @@ module.exports = {
       console.log("Order ID:", orderId);
 
       const order = await Order.findById(orderId).populate('items.product').populate('shippingAddress').exec();
+      const wishlist = await Wishlist.findOne({ user: user }).populate('items.product');
+      const cart = await Cart.findOne({ user: user }).populate('items.product').exec()
 
       if (!order) {
-        console.log("Order not found");
-        return res.status(404).json({ error: 'Order not found' });
+        console.log("Order not found")
+        return res.status(404).json({ error: 'Order not found' })
       }
 
       const categories = await Category.find();
-      res.render('userviews/orderdetails', { title: 'My Orders', order, category: categories });
+      res.render('userviews/orderdetails', { title: 'My Orders', order, category: categories ,wishlist,cart})
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      console.error(error)
+      res.status(500).json({ error: 'Internal Server Error' })
     }
   },
 
@@ -327,6 +332,8 @@ module.exports = {
       const categories = await Category.find();
       const walletBalance = wallet.balance;
       const transactiontype = wallet.transactiontype;
+      const wishlist = await Wishlist.findOne({ user: user }).populate('items.product');
+      const cart = await Cart.findOne({ user: user }).populate('items.product').exec();
 
       return res.render('userviews/wallet', {
         title: 'Wallet',
@@ -334,7 +341,8 @@ module.exports = {
         category: categories,
         user,
         walletBalance,
-        transactiontype
+        transactiontype,
+        wishlist, cart
       });
     } catch (error) {
       console.error('Error fetching wallet balance:', error);
@@ -393,43 +401,33 @@ module.exports = {
     try {
       const orderId = req.params.orderId;
       const user = req.session.user
-
+  
       const order = await Order.findById(orderId).populate('items.product').populate('shippingAddress');
       if (!order) {
         return res.status(404).send('Order not found');
       }
-
+  
       const data = {
         order: order,
         formattedDate: new Date(order.orderdate).toLocaleDateString(),
         user: user
       };
-
-      ejs.renderFile(path.join(__dirname, '..', 'views', 'userviews', 'invoice.ejs'), data, (err, html) => {
-        if (err) {
-          console.error('Error rendering EJS file:', err);
-          return res.status(500).send('Internal Server Error');
-        }
-
-        const options = {
-          format: 'Letter'
-        };
-
-        pdf.create(html, options).toStream((err, stream) => {
-          if (err) {
-            console.error('Error converting HTML to PDF:', err);
-            return res.status(500).send('Internal Server Error');
-          }
-
-          const fileName = `invoice_${orderId}.pdf`;
-          res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
-          res.setHeader('Content-type', 'application/pdf');
-
-          stream.pipe(res);
-        });
-      });
+  
+      const ejsTemplate = await ejs.renderFile(path.join(__dirname, '..', 'views', 'userviews', 'invoice.ejs'), data);
+      const browser = await puppeteer.launch();
+      const page = await browser.newPage();
+      await page.setContent(ejsTemplate);
+      
+      const pdfBuffer = await page.pdf({ format: 'A4' });
+  
+      await browser.close();
+  
+      const fileName = `invoice_${orderId}.pdf`;
+      res.setHeader('Content-disposition', `attachment; filename=${fileName}`);
+      res.setHeader('Content-type', 'application/pdf');
+      res.send(pdfBuffer);
     } catch (error) {
-      console.error(error);
+      console.error('Error generating PDF:', error);
       res.status(500).send('Internal Server Error');
     }
   },

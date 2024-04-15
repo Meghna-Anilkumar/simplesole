@@ -5,7 +5,7 @@ const Product = require('../models/product');
 const ProductOffer = require('../models/productoffermodel');
 const { calculateTotalPrice } = require('../utils/cartfunctions');
 const CategoryOffer = require('../models/categoryoffer'); 
-
+const Wishlist=require('../models/wishlist')
 
 module.exports = {
   
@@ -14,6 +14,7 @@ module.exports = {
   try {
     const user = req.session.user;
     const cart = await Cart.findOne({ user }).populate('items.product').exec();
+    const wishlist = await Wishlist.findOne({ user: user._id }).populate('items.product').exec(); 
 
     if (!cart) {
       return res.render('userviews/cart', { title: 'Cart', category: [], data: { total: 0 }, cart });
@@ -39,9 +40,9 @@ module.exports = {
     // Check if item.product is defined
     if (cart.items && cart.items.length > 0 && cart.items[0].product) {
       const product = cart.items[0].product;
-      res.render('userviews/cart', { title: 'Cart', category: categories, cart, data, productOffers, product });
+      res.render('userviews/cart', { title: 'Cart', category: categories, cart, data, productOffers, product ,wishlist});
     } else {
-      res.render('userviews/cart', { title: 'Cart', category: categories, cart, data, productOffers });
+      res.render('userviews/cart', { title: 'Cart', category: categories, cart, data, productOffers,wishlist });
     }
   } catch (error) {
     console.error('Error:', error);

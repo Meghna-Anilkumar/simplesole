@@ -6,6 +6,8 @@ const categorycontroller = require('../Controller/categorycontroller');
 const Wishlist = require('../models/wishlist')
 const ProductOffer = require('../models/productoffermodel')
 const CategoryOffer = require('../models/categoryoffer')
+const Cart = require('../models/cartSchema');
+
 
 module.exports = {
 
@@ -148,6 +150,16 @@ module.exports = {
         images: updatedImages,
       };
 
+      let categoryOfferPrice = updatedProduct.price; 
+      const categoryOffer = await CategoryOffer.findOne({ category: updatedProduct.category }).exec();
+      if (categoryOffer) {
+        const discountPercentage = categoryOffer.discountPercentage;
+        const discountAmount = (updatedProduct.price * discountPercentage) / 100;
+        categoryOfferPrice = updatedProduct.price - discountAmount;
+      }
+
+      updatedProduct.categoryofferprice = categoryOfferPrice;
+
       const result = await Product.findByIdAndUpdate(id, updatedProduct);
 
       req.session.message = {
@@ -170,13 +182,30 @@ module.exports = {
       const categoryId = req.params.categoryId;
       const selectedCategory = await Category.findById(categoryId);
       const products = await Product.find({ category: categoryId });
-      const categoryOffers = await CategoryOffer.find({ category: categoryId }); 
-      res.render('userviews/viewproductsCategorywise', { title: 'Products in category', category: selectedCategory, selectedCategory: selectedCategory, products: products, categoryOffers: categoryOffers }); 
+      const categoryOffers = await CategoryOffer.find({ category: categoryId })
+
+
+      // Fetch the cart here
+      const user = req.session.user;
+      const cart = await Cart.findOne({ user }).populate('items.product').exec();
+      const wishlist = await Wishlist.findOne({ user });
+
+      res.render('userviews/viewproductsCategorywise', {
+        title: 'Products in category',
+        category: selectedCategory,
+        selectedCategory: selectedCategory,
+        products: products,
+        categoryOffers: categoryOffers,
+        cart: cart,
+        wishlist: wishlist
+      });
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
     }
   },
+
+
 
 
   //get product details
@@ -191,9 +220,11 @@ module.exports = {
 
       const user = req.session.user;
       let productInWishlist = false;
+      const cart = await Cart.findOne({ user }).populate('items.product').exec();
+      var wishlist = await Wishlist.findOne({ user });
 
       if (user) {
-        const wishlist = await Wishlist.findOne({ user: user._id });
+        wishlist = await Wishlist.findOne({ user: user._id });
 
         if (wishlist) {
           productInWishlist = wishlist.items.some(item => item.product.toString() === productId);
@@ -209,15 +240,16 @@ module.exports = {
         expiryDate: { $gte: new Date() }
       });
 
-
       res.render('userviews/productdetails', {
         title: 'Products in category',
         category: selectedCategory,
         selectedCategory: selectedCategory,
         products: products,
         product: product,
-        productInWishlist: productInWishlist, 
-        productOffers: productOffers
+        productInWishlist: productInWishlist,
+        productOffers: productOffers,
+        wishlist: wishlist,
+        cart
       });
     } catch (error) {
       console.error(error);
@@ -251,54 +283,59 @@ module.exports = {
   //get all products page
   getAllProducts: async (req, res) => {
     try {
-        let allProducts;
-        const category = await Category.find().exec();
-        const productOffers = await ProductOffer.find({
-            startDate: { $lte: new Date() },
-            expiryDate: { $gte: new Date() }
-        }).populate('product').exec();
-        const categoryOffers = await CategoryOffer.find({
-            startDate: { $lte: new Date() },
-            expiryDate: { $gte: new Date() }
-        }).populate('category').exec();
+      let allProducts;
+      const category = await Category.find().exec();
+      const productOffers = await ProductOffer.find({
+        startDate: { $lte: new Date() },
+        expiryDate: { $gte: new Date() }
+      }).populate('product').exec();
+      const categoryOffers = await CategoryOffer.find({
+        startDate: { $lte: new Date() },
+        expiryDate: { $gte: new Date() }
+      }).populate('category').exec();
 
-        if (req.query.query) {
-            const searchQuery = req.query.query;
-            const regex = new RegExp(searchQuery, 'i');
-            allProducts = await Product.find({ name: regex });
-        } else {
-            allProducts = await Product.find();
-        }
+      if (req.query.query) {
+        const searchQuery = req.query.query;
+        const regex = new RegExp(searchQuery, 'i');
+        allProducts = await Product.find({ name: regex });
+      } else {
+        allProducts = await Product.find();
+      }
 
-        if (req.query.sortOption === 'priceLowToHigh') {
-            allProducts.sort((a, b) => a.price - b.price);
-        } else if (req.query.sortOption === 'priceHighToLow') {
-            allProducts.sort((a, b) => b.price - a.price);
-        }
+      if (req.query.sortOption === 'priceLowToHigh') {
+        allProducts.sort((a, b) => a.price - b.price);
+      } else if (req.query.sortOption === 'priceHighToLow') {
+        allProducts.sort((a, b) => b.price - a.price);
+      }
 
-        const perPage = 12;
-        const page = parseInt(req.query.page) || 1; 
-        const totalProducts = allProducts.length; 
-        const totalPages = Math.ceil(totalProducts / perPage); 
-        
-        const skip = (page - 1) * perPage;
+      const perPage = 12;
+      const page = parseInt(req.query.page) || 1;
+      const totalProducts = allProducts.length;
+      const totalPages = Math.ceil(totalProducts / perPage);
 
-        allProducts = allProducts.slice(skip, skip + perPage);
+      const skip = (page - 1) * perPage;
 
-        res.render('userviews/allproducts', {
-            title: 'All Products',
-            allProducts: allProducts,
-            category: category,
-            productOffers: productOffers,
-            categoryOffers: categoryOffers,
-            currentPage: page,
-            totalPages: totalPages
-        });
+      allProducts = allProducts.slice(skip, skip + perPage);
+      const user = req.session.user;
+      const cart = await Cart.findOne({ user }).populate('items.product').exec();
+
+      res.render('userviews/allproducts', {
+        title: 'All Products',
+        allProducts: allProducts,
+        category: category,
+        productOffers: productOffers,
+        categoryOffers: categoryOffers,
+        currentPage: page,
+        totalPages: totalPages,
+        wishlist: req.session.wishlist,
+        cart:cart
+      });
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
+      console.error(error);
+      res.status(500).send('Internal Server Error');
     }
-},
+  },
+
 
 
   //search products
@@ -326,28 +363,28 @@ module.exports = {
   //filter products
   filterproducts: async (req, res) => {
     try {
-        let filteredProducts = await Product.find();
+      let filteredProducts = await Product.find();
 
-        if (req.query.color) {
-            filteredProducts = filteredProducts.filter(product => product.color === req.query.color);
-        }
+      if (req.query.color) {
+        filteredProducts = filteredProducts.filter(product => product.color === req.query.color);
+      }
 
-        if (req.query.size) {
-            filteredProducts = filteredProducts.filter(product => product.size.includes(req.query.size));
-        }
+      if (req.query.size) {
+        filteredProducts = filteredProducts.filter(product => product.size.includes(req.query.size));
+      }
 
-        if (req.query.minPrice && req.query.maxPrice) {
-            const minPrice = parseFloat(req.query.minPrice);
-            const maxPrice = parseFloat(req.query.maxPrice);
-            filteredProducts = filteredProducts.filter(product => product.price >= minPrice && product.price <= maxPrice);
-        }
+      if (req.query.minPrice && req.query.maxPrice) {
+        const minPrice = parseFloat(req.query.minPrice);
+        const maxPrice = parseFloat(req.query.maxPrice);
+        filteredProducts = filteredProducts.filter(product => product.price >= minPrice && product.price <= maxPrice);
+      }
 
-        res.json(filteredProducts);
+      res.json(filteredProducts);
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
+      console.error(error);
+      res.status(500).send('Internal Server Error');
     }
-},
+  },
 
 
 };

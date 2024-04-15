@@ -10,27 +10,29 @@ module.exports = {
     getwishlistpage: async (req, res) => {
         try {
             const user = req.session.user;
-        
+    
             if (!user) {
-              return res.redirect('/login');
+                return res.redirect('/login');
             }
-        
+    
             const wishlist = await Wishlist.findOne({ user: user._id }).populate('items.product');
             const categories = await Category.find();
             const cart = await Cart.findOne({ user }).populate('items.product').exec();
-        
-            if (!wishlist) {
-              return res.render('userviews/wishlist', { allProducts: [] , title: 'Wishlist', category: categories, cart}); 
+    
+            let allProducts = [];
+            if (wishlist) {
+                allProducts = wishlist.items.map(item => item.product);
             }
-        
-            const allProducts = wishlist.items.map(item => item.product);
-        
-            res.render('userviews/wishlist', { allProducts: allProducts , title: 'Wishlist', category: categories, cart });
-          } catch (error) {
+    
+            res.render('userviews/wishlist', { wishlist: wishlist, allProducts: allProducts, title: 'Wishlist', category: categories, cart: cart });
+        } catch (error) {
             console.error(error);
             res.status(500).send('Internal Server Error');
-          }
-        },
+        }
+    },
+    
+    
+    
 
     //add to wishlist
     addtowishlist: async (req, res) => {
