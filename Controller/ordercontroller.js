@@ -416,7 +416,7 @@ module.exports = {
       console.log('hiiiiiiii')
   
       const ejsTemplate = await ejs.renderFile(path.join(__dirname, '..', 'views', 'userviews', 'invoice.ejs'), data);
-      const browser = await puppeteer.launch({headless:'new'});
+      const browser = await puppeteer.launch();
       const page = await browser.newPage();
       await page.setContent(ejsTemplate);
       
