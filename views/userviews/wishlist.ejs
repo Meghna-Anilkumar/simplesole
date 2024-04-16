@@ -107,7 +107,9 @@
         <td width="45%">
             <div class="display-flex align-center">
                 <div class="img-product">
+                    <a href="/products/<%= product._id %>">
                     <img src="<%= product.images[0] %>" alt="<%= product.name %>" class="mCS_img_loaded">
+                    </a>
                 </div>
                 <div class="name-product">
                     <%= product.name %>

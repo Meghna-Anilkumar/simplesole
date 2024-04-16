@@ -166,7 +166,9 @@ a:hover{
                     <div class="row border-top border-bottom">
                         <div class="row main align-items-center">
                             <div class="col-2">
+                                <a href="/products/<%= product._id %>">
                                 <img class="img-fluid" src="<%= item.product.images[0] %>">
+                                </a>
                             </div>
                             <div class="col">
                                 <div class="row text-muted"><%= item.product.name %></div>
@@ -174,21 +176,31 @@ a:hover{
                                 <!-- <div class="row"><%= item.product.description %></div> -->
                             </div>
                             <div class="col">
-                                <button type="button" class="quantity-button" onclick="updateQuantity('<%= item.product._id %>', -1)">-</button>
-                                <span id="<%= item.product._id %>" class="quantity" max="<%= item.product.stock %>" ><%= item.quantity %></span>
-                                <button type="button" class="quantity-button" onclick="updateQuantity('<%= item.product._id %>', 1)">+</button>
+                                <div>
+                                    <button type="button" class="quantity-button" onclick="updateQuantity('<%= item.product._id %>', -1)">-</button>
+                                    <span id="<%= item.product._id %>" class="quantity" max="<%= item.product.stock %>">
+                                        <%= item.quantity %>
+                                    </span>
+                                    <button type="button" class="quantity-button" onclick="updateQuantity('<%= item.product._id %>', 1)">+</button>
+                                </div>
+                                <% if (item.quantity >= item.product.stock) { %>
+                                    <div style="color:red;">(Max stock reached)</div>
+                                <% } %>
                             </div>
+                            
+                            
                             <div class="col" id="<%= item.product._id %>">
                                 <% const productOffer = productOffers.find(offer => offer.product.toString() === item.product._id.toString()); %>
                                 <% if (productOffer) { %>
                                     <!-- Show the new price if a product offer is available -->
-                                    &#8377;<%= productOffer.newPrice * item.quantity %>
+                                    &#8377;<%= productOffer.newPrice  %>
                                 <% } else if (item.product.categoryofferprice && item.product.categoryofferprice < item.product.price) { %>
                                     <!-- Show the category offer price if available and less than the original price -->
-                                    &#8377;<%= item.product.categoryofferprice * item.quantity %>
+                                    &#8377;<%= item.product.categoryofferprice
+                                    %>
                                 <% } else { %>
                                     <!-- Show the original price if no offers are available -->
-                                    &#8377;<%= item.product.price * item.quantity %>
+                                    &#8377;<%= item.product.price %>
                                 <% } %>
                                 <button type="button" style="margin-left: 50px;" onclick="removeItem('<%= item.product._id %>')">X</button>
                             </div>         
@@ -211,7 +223,6 @@ a:hover{
                 <div id="totalPrice" class="col text-right">&#8377;<%= data.total %></div>
             </div>
             <form>
-                <!-- <p>SHIPPING</p> -->
                 
             </form>
             <div class="row" style="border-top: 1px solid rgba(0,0,0,.1); padding: 2vh 0;">

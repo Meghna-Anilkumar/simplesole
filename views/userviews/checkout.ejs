@@ -45,19 +45,9 @@
       padding-left: 10px;
     }
 
-    /* body {
-  font-family: "Josefin Sans", sans-serif;
-  color: #0a0a0a;
-  line-height: 1.4;
-} */
-
     a {
       color: #000;
     }
-
-    /* .content {
-  z-index: 9999;
-} */
 
     .secure,
     .backBtn {
@@ -424,7 +414,6 @@
     cursor: not-allowed; /* Change cursor */
   }
 
-  /* Optional: Style for enabled payment options */
   .payment__type label {
     color: #333; /* Default label color */
     cursor: pointer; /* Default cursor */
@@ -472,8 +461,21 @@
         <div class="col text-right">&#8377;<%= cart.total %>
         </div>
       </div>
-
-      <p>SHIPPING</p>
+      <div class="row">
+        <div class="col" style="padding-left:0;">
+         COUPON DISCOUNT
+        </div>
+        <div class="col text-right">
+          <% if (typeof discount !== 'undefined') { %>
+              &#8377;<%= discount.toFixed(2) %>
+          <% } else { %>
+              <!-- Handle case where discount is not defined -->
+              <!-- Maybe display a message or leave it blank -->
+          <% } %>
+      </div>
+      
+      </div>
+<BR>
       <p>APPLY COUPON</p>
                 <input id="code" placeholder="Enter coupon code" name="couponcode">
                 <button id="applyCouponBtn" class="button-base-button" data-applied="false">Apply</button>

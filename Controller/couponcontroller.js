@@ -112,6 +112,7 @@ module.exports = {
             await cart.save()
 
             req.session.couponCode = couponCode
+            req.session.discount=discount
 
             return res.json({ success: true, newTotal: newTotal, coupon: coupon });
         } catch (error) {
