@@ -22,6 +22,8 @@ const db = mongoose.connection
 db.on('error', (error) => console.log(error))
 db.once('open', () => console.log('connected to the database'))
 
+
+
 const store = new MongoDBSession({
     uri: process.env.DB_URI,
     collection: 'mySessions'
