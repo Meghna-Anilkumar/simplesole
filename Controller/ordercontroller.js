@@ -412,6 +412,8 @@ module.exports = {
         formattedDate: new Date(order.orderdate).toLocaleDateString(),
         user: user
       };
+
+      console.log('hiiiiiiii')
   
       const ejsTemplate = await ejs.renderFile(path.join(__dirname, '..', 'views', 'userviews', 'invoice.ejs'), data);
       const browser = await puppeteer.launch();
